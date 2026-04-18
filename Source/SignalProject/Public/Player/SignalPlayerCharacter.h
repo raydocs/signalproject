@@ -39,9 +39,18 @@ public:
     FSignalInteractionPromptChangedSignature OnInteractionPromptChanged;
 
 private:
+    void MoveForward(float Value);
+    void MoveRight(float Value);
+    void TurnCamera(float Value);
+    void LookUpCamera(float Value);
+    void UpdateDebugInteractionPrompt();
+
     UPROPERTY(Transient)
     TObjectPtr<AActor> CurrentFocusedInteractable;
 
     UPROPERTY(Transient)
     FText CurrentPromptText;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Signal Slice|Interaction")
+    bool bUseDebugInteractionPrompt = true;
 };

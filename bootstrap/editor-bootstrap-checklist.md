@@ -24,7 +24,7 @@ Companion landing docs:
 - [ ] Open `SignalProject.uproject` in UE5.7 and let Unreal finish startup.
 - [ ] Confirm module `SignalProject` is loaded.
 - [ ] Confirm native classes are visible (FlowManager, RouteStateManager, AnomalyManager, ChatConversationManager, MinigameManager, HiddenDialogueUnlocker, ComputerTerminal, AirConditionerUnit).
-- [ ] Confirm `GlobalDefaultGameMode=/Script/SignalProject.SignalGameMode` is active.
+- [ ] Confirm the playable path uses `BP_SignalGameMode` (global default and/or map override).
 - [ ] Keep `DefaultInput` mappings unchanged (`Interact`, `LeaveDesktop`).
 
 ## B. DataTable import (frozen order)

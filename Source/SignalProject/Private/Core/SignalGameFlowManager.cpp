@@ -3,13 +3,21 @@
 #include "Anomalies/AnomalyManager.h"
 #include "Core/RouteStateManager.h"
 #include "Dialogue/ChatConversationManager.h"
+#include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
 #include "Minigames/MinigameManager.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "Player/SignalPlayerController.h"
 
 ASignalGameFlowManager::ASignalGameFlowManager()
 {
     PrimaryActorTick.bCanEverTick = false;
+}
+
+namespace
+{
+    constexpr uint64 SignalPhaseDebugMessageKey = 420043;
 }
 
 void ASignalGameFlowManager::BeginPlay()
@@ -48,7 +56,7 @@ void ASignalGameFlowManager::StartDay(int32 DayIndex)
         ChatConversationManagerRef->InitializeChatSystem(CurrentDayIndex);
     }
 
-    RequestPhaseChange(E_GamePhase::RoomExplore);
+    RequestPhaseChange(ResolveStartupPhase());
 }
 
 bool ASignalGameFlowManager::RequestPhaseChange(E_GamePhase NewPhase)
@@ -77,6 +85,22 @@ void ASignalGameFlowManager::HandlePhaseEntered(E_GamePhase NewPhase)
         return;
     }
 
+    const UEnum* PhaseEnum = StaticEnum<E_GamePhase>();
+    const FString PhaseName = PhaseEnum ? PhaseEnum->GetNameStringByValue(static_cast<int64>(NewPhase)) : TEXT("UnknownPhase");
+    UE_LOG(LogTemp, Display, TEXT("Entered phase: %s"), *PhaseName);
+#if !UE_BUILD_SHIPPING
+    if (GEngine)
+    {
+        GEngine->AddOnScreenDebugMessage(
+            SignalPhaseDebugMessageKey,
+            5.0f,
+            FColor::Green,
+            FString::Printf(TEXT("Phase: %s"), *PhaseName),
+            false,
+            FVector2D(1.1f, 1.1f));
+    }
+#endif
+
     switch (NewPhase)
     {
     case E_GamePhase::RoomExplore:
@@ -85,16 +109,31 @@ void ASignalGameFlowManager::HandlePhaseEntered(E_GamePhase NewPhase)
         CachedPlayerController->SetRoomInputMode();
         break;
     case E_GamePhase::DesktopIdle:
+        CachedPlayerController->ShowDesktopRoot();
+        CachedPlayerController->SetDesktopInputMode();
+        CachedPlayerController->RefreshDesktopRootAvailability();
+        break;
     case E_GamePhase::ChatActive:
+        CachedPlayerController->ShowDesktopRoot();
+        CachedPlayerController->SetDesktopInputMode();
+        CachedPlayerController->RefreshDesktopRootAvailability();
+        CachedPlayerController->OpenDesktopApp(FName(TEXT("Chat")));
+        break;
     case E_GamePhase::MinigameActive:
     case E_GamePhase::AnomalyChoice:
+        CachedPlayerController->ShowDesktopRoot();
+        CachedPlayerController->SetDesktopInputMode();
+        CachedPlayerController->RefreshDesktopRootAvailability();
+        break;
     case E_GamePhase::ReportPhase:
         CachedPlayerController->ShowDesktopRoot();
         CachedPlayerController->SetDesktopInputMode();
+        CachedPlayerController->RefreshDesktopRootAvailability();
+        CachedPlayerController->OpenDesktopApp(FName(TEXT("Report")));
         break;
     case E_GamePhase::EndingSequence:
         CachedPlayerController->HideDesktopRoot();
-        CachedPlayerController->SetRoomInputMode();
+        CachedPlayerController->SetDesktopInputMode();
         CachedPlayerController->ShowEndingTitleCard(PendingEndingId);
         break;
     default:
@@ -104,16 +143,29 @@ void ASignalGameFlowManager::HandlePhaseEntered(E_GamePhase NewPhase)
 
 bool ASignalGameFlowManager::CanEnterDesktop() const
 {
-    return CurrentPhase == E_GamePhase::RoomExplore ||
-           CurrentPhase == E_GamePhase::DesktopIdle ||
-           CurrentPhase == E_GamePhase::ChatActive;
+    return CurrentPhase == E_GamePhase::RoomExplore;
 }
 
 bool ASignalGameFlowManager::CanOpenReport() const
 {
-    return CurrentPhase == E_GamePhase::DesktopIdle ||
-           CurrentPhase == E_GamePhase::ChatActive ||
-           CurrentPhase == E_GamePhase::MinigameActive;
+    if (CurrentPhase == E_GamePhase::MinigameActive ||
+        CurrentPhase == E_GamePhase::AnomalyChoice ||
+        CurrentPhase == E_GamePhase::HandleAnomaly3D)
+    {
+        return false;
+    }
+
+    if (!RouteStateManagerRef)
+    {
+        return false;
+    }
+
+    if (RouteStateManagerRef->LastRouteChoice == E_RouteBranch::HandleMyself)
+    {
+        return RouteStateManagerRef->bHasConsumedColleagueAHiddenOption;
+    }
+
+    return RouteStateManagerRef->LastRouteChoice == E_RouteBranch::ReportSupervisor;
 }
 
 void ASignalGameFlowManager::SubmitSliceReport(FName /*SelectedSentenceId*/)
@@ -126,4 +178,32 @@ void ASignalGameFlowManager::TriggerEnding(FName EndingId)
 {
     PendingEndingId = EndingId;
     RequestPhaseChange(E_GamePhase::EndingSequence);
+}
+
+E_GamePhase ASignalGameFlowManager::ResolveStartupPhase() const
+{
+    FString RequestedPhaseName;
+    if (!FParse::Value(FCommandLine::Get(), TEXT("SignalDebugPhase="), RequestedPhaseName))
+    {
+        return E_GamePhase::RoomExplore;
+    }
+
+    RequestedPhaseName.TrimStartAndEndInline();
+
+    const UEnum* PhaseEnum = StaticEnum<E_GamePhase>();
+    if (!PhaseEnum)
+    {
+        return E_GamePhase::RoomExplore;
+    }
+
+    const int64 EnumValue = PhaseEnum->GetValueByNameString(RequestedPhaseName);
+    if (EnumValue == INDEX_NONE)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Unknown -SignalDebugPhase value '%s'; defaulting to RoomExplore."), *RequestedPhaseName);
+        return E_GamePhase::RoomExplore;
+    }
+
+    const E_GamePhase RequestedPhase = static_cast<E_GamePhase>(EnumValue);
+    UE_LOG(LogTemp, Display, TEXT("Applying debug startup phase: %s"), *RequestedPhaseName);
+    return RequestedPhase;
 }

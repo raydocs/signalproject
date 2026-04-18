@@ -41,12 +41,13 @@ void AAnomalyManager::TriggerAnomaly(E_AnomalyType NewAnomaly)
 
     bAnomalyActive = true;
     CurrentAnomalyType = NewAnomaly;
-    OnAnomalyTriggered.Broadcast(NewAnomaly);
 
     if (GameFlowManagerRef)
     {
         GameFlowManagerRef->RequestPhaseChange(E_GamePhase::AnomalyChoice);
     }
+
+    OnAnomalyTriggered.Broadcast(NewAnomaly);
 }
 
 void AAnomalyManager::ResolveCurrentAnomaly()

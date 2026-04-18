@@ -87,6 +87,13 @@ void AMinigameManager::CompleteMinigame()
     }
 
     bIsMinigameRunning = false;
+
+    if (GameFlowManagerRef &&
+        GameFlowManagerRef->GetCurrentPhase() == E_GamePhase::MinigameActive &&
+        (!AnomalyManagerRef || !AnomalyManagerRef->bAnomalyActive))
+    {
+        GameFlowManagerRef->RequestPhaseChange(E_GamePhase::ReportPhase);
+    }
 }
 
 void AMinigameManager::HandleAnomalyTriggered(E_AnomalyType TriggeredAnomaly)

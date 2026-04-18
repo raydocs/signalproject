@@ -85,6 +85,8 @@ public:
     FSignalPhaseChangedSignature OnPhaseChanged;
 
 private:
+    E_GamePhase ResolveStartupPhase() const;
+
     UPROPERTY(Transient)
     TObjectPtr<ASignalPlayerController> CachedPlayerController;
 };

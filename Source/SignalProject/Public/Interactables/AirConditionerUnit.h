@@ -11,6 +11,7 @@ class AHiddenDialogueUnlocker;
 class ASignalGameFlowManager;
 class UDataTable;
 class USceneComponent;
+class UStaticMeshComponent;
 
 UCLASS(Blueprintable)
 class SIGNALPROJECT_API AAirConditionerUnit : public AActor, public IInteractable
@@ -33,6 +34,9 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Signal Slice|Interactable")
     TObjectPtr<USceneComponent> SceneRoot;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Signal Slice|Interactable")
+    TObjectPtr<UStaticMeshComponent> AirConditionerMesh;
 
     UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Signal Slice|Refs")
     TObjectPtr<AAnomalyManager> AnomalyManagerRef;

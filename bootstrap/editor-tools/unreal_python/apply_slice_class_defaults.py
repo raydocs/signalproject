@@ -13,6 +13,19 @@ TARGET_MAP = "/Game/Signal/Levels/Gameplay/LV_ApartmentMain"
 
 # (Blueprint asset path, property name, kind, value asset path)
 BINDINGS = [
+    # Game mode playable class chain
+    (
+        "/Game/Signal/Blueprints/Framework/BP_SignalGameMode",
+        "player_controller_class",
+        "class",
+        "/Game/Signal/Blueprints/Player/BP_SignalPlayerController",
+    ),
+    (
+        "/Game/Signal/Blueprints/Framework/BP_SignalGameMode",
+        "default_pawn_class",
+        "class",
+        "/Game/Signal/Blueprints/Player/BP_SignalPlayerCharacter",
+    ),
     # Controller widget classes
     (
         "/Game/Signal/Blueprints/Player/BP_SignalPlayerController",

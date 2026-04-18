@@ -2,13 +2,17 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "SignalSliceTypes.h"
 #include "DesktopRootWidget.generated.h"
 
 class AChatConversationManager;
 class AMinigameManager;
 class ARouteStateManager;
 class ASignalGameFlowManager;
+class UButton;
 class UChatAppWidget;
+class UOverlay;
+class UTextBlock;
 class UReportEditorWidget;
 
 UCLASS(Abstract, Blueprintable)
@@ -17,6 +21,8 @@ class SIGNALPROJECT_API UDesktopRootWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
+    virtual void NativeConstruct() override;
+
     UFUNCTION(BlueprintCallable, Category = "Signal Slice|Desktop")
     void InitializeForSlice(
         ASignalGameFlowManager* InFlowManager,
@@ -42,6 +48,22 @@ protected:
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Signal Slice|Desktop")
     void BP_OnAppAvailabilityChanged(bool bCanOpenReport);
+
+private:
+    UFUNCTION()
+    void HandlePhaseChanged(E_GamePhase PreviousPhase, E_GamePhase NewPhase);
+
+    UFUNCTION()
+    void HandleChatMessagesUpdated();
+
+    UFUNCTION()
+    void HandleDebugOpenChatClicked();
+
+    UFUNCTION()
+    void HandleDebugOpenReportClicked();
+
+    bool EnsureDebugShell();
+    void RefreshDebugStatus();
 
 public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Signal Slice|Desktop")
@@ -71,4 +93,19 @@ private:
 
     UPROPERTY(Transient)
     TObjectPtr<UUserWidget> ActiveAppWidget;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UOverlay> DebugRootOverlay;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UTextBlock> DebugPhaseText;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UTextBlock> DebugAppText;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UButton> DebugChatButton;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UButton> DebugReportButton;
 };

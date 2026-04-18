@@ -20,6 +20,8 @@ class SIGNALPROJECT_API ASignalPlayerController : public APlayerController
 public:
     ASignalPlayerController();
 
+    virtual void BeginPlay() override;
+    virtual void OnPossess(APawn* InPawn) override;
     virtual void SetupInputComponent() override;
 
     UFUNCTION(BlueprintCallable, Category = "Signal Slice|Controller")
@@ -43,6 +45,12 @@ public:
     void HideDesktopRoot();
 
     UFUNCTION(BlueprintCallable, Category = "Signal Slice|Controller")
+    bool OpenDesktopApp(FName AppTag);
+
+    UFUNCTION(BlueprintCallable, Category = "Signal Slice|Controller")
+    void RefreshDesktopRootAvailability();
+
+    UFUNCTION(BlueprintCallable, Category = "Signal Slice|Controller")
     bool ShowEndingTitleCard(FName EndingId);
 
 public:
@@ -55,9 +63,24 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Signal Slice|UI")
     bool bIsInDesktopMode = false;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Signal Slice|Debug")
+    bool bApplyStartupViewRotation = true;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Signal Slice|Debug")
+    FRotator StartupViewRotation = FRotator(-6.0f, 35.0f, 0.0f);
+
 private:
     UFUNCTION()
     void HandleLeaveDesktopPressed();
+
+    UFUNCTION()
+    void HandleDebugOpenDesktopPressed();
+
+    UFUNCTION()
+    void HandleDebugOpenChatPressed();
+
+    void ApplyStartupViewRotation();
+    void SetPawnMovementEnabled(bool bEnabled);
 
 private:
     UPROPERTY(Transient)

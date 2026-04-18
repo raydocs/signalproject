@@ -8,6 +8,7 @@
 class ASignalGameFlowManager;
 class UDataTable;
 class USceneComponent;
+class UStaticMeshComponent;
 
 UCLASS(Blueprintable)
 class SIGNALPROJECT_API AComputerTerminal : public AActor, public IInteractable
@@ -24,6 +25,9 @@ public:
 public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Signal Slice|Interactable")
     TObjectPtr<USceneComponent> SceneRoot;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Signal Slice|Interactable")
+    TObjectPtr<UStaticMeshComponent> TerminalMesh;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Signal Slice|Interactable")
     TObjectPtr<USceneComponent> DeskViewAnchor;

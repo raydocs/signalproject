@@ -10,6 +10,8 @@ import unreal
 
 STOP_ON_ERROR = True
 LEVEL_PATH = "/Game/Signal/Levels/Gameplay/LV_ApartmentMain"
+GAME_MODE_OVERRIDE_BP = "/Game/Signal/Blueprints/Framework/BP_SignalGameMode"
+GAME_MODE_OVERRIDE_FALLBACK = "/Script/SignalProject.SignalGameMode"
 
 ACTOR_SPECS = {
     "flow": {
@@ -207,6 +209,26 @@ def _verify_class_defaults() -> None:
         unreal.log(f"Class default OK: {bp_path}.{prop} -> {_obj_path_or_none(value)}")
 
 
+def _apply_world_settings(summary: dict) -> None:
+    editor_world = unreal.EditorLevelLibrary.get_editor_world()
+    if not editor_world:
+        raise RuntimeError("Failed to access editor world")
+
+    world_settings = editor_world.get_world_settings()
+    desired_game_mode = _load_spawn_class(GAME_MODE_OVERRIDE_BP, GAME_MODE_OVERRIDE_FALLBACK)
+
+    world_settings.set_editor_property("default_game_mode", desired_game_mode)
+    actual = world_settings.get_editor_property("default_game_mode")
+    if actual != desired_game_mode:
+        raise RuntimeError(
+            "WorldSettings.default_game_mode verification mismatch: "
+            f"{_obj_path_or_none(actual)} != {_obj_path_or_none(desired_game_mode)}"
+        )
+
+    summary["bindings"].append("WorldSettings.default_game_mode")
+    unreal.log(f"World settings OK: default_game_mode -> {_obj_path_or_none(actual)}")
+
+
 def _save_level() -> None:
     if not unreal.EditorLevelLibrary.save_current_level():
         raise RuntimeError("Failed to save current level")
@@ -274,6 +296,7 @@ def run() -> None:
         _safe_set(actors["air"], "GameFlowManagerRef", actors["flow"], summary)
         _safe_set(actors["air"], "SystemCopyTable", dt_system, summary)
 
+        _apply_world_settings(summary)
         _verify_class_defaults()
         _save_level()
 

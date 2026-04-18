@@ -31,22 +31,40 @@ EXPECTED_TABLES = {
 
 CLASS_DEFAULT_CHECKS = [
     (
+        "/Game/Signal/Blueprints/Framework/BP_SignalGameMode",
+        "player_controller_class",
+        "/Game/Signal/Blueprints/Player/BP_SignalPlayerController.BP_SignalPlayerController_C",
+    ),
+    (
+        "/Game/Signal/Blueprints/Framework/BP_SignalGameMode",
+        "default_pawn_class",
+        "/Game/Signal/Blueprints/Player/BP_SignalPlayerCharacter.BP_SignalPlayerCharacter_C",
+    ),
+    (
         "/Game/Signal/Blueprints/Player/BP_SignalPlayerController",
         "DesktopRootWidgetClass",
+        "/Game/Signal/Blueprints/UI/WBP_DesktopRoot.WBP_DesktopRoot_C",
     ),
     (
         "/Game/Signal/Blueprints/Player/BP_SignalPlayerController",
         "EndingTitleCardWidgetClass",
+        "/Game/Signal/Blueprints/Endings/WBP_EndingTitleCard.WBP_EndingTitleCard_C",
     ),
     (
         "/Game/Signal/Blueprints/Minigames/BP_MinigameManager",
         "DependencyMatchWidgetClass",
+        "/Game/Signal/Blueprints/Minigames/WBP_MG_DependencyMatch.WBP_MG_DependencyMatch_C",
     ),
     (
         "/Game/Signal/Blueprints/Minigames/BP_MinigameManager",
         "AnomalyChoicePopupClass",
+        "/Game/Signal/Blueprints/UI/WBP_AnomalyChoicePopup.WBP_AnomalyChoicePopup_C",
     ),
 ]
+
+EXPECTED_WORLD_SETTINGS = {
+    "default_game_mode": "/Game/Signal/Blueprints/Framework/BP_SignalGameMode.BP_SignalGameMode_C",
+}
 
 
 def _all_actors() -> list[unreal.Actor]:
@@ -93,7 +111,7 @@ def _expect_asset_path(owner, prop: str, expected_path: str) -> None:
         )
 
 
-def _load_level() -> None:
+def _load_level():
     level_obj_path = f"{LEVEL_PATH}.{LEVEL_PATH.rsplit('/', 1)[-1]}"
     if not unreal.EditorAssetLibrary.does_asset_exist(level_obj_path):
         raise RuntimeError(f"Missing map asset: {LEVEL_PATH}")
@@ -101,10 +119,11 @@ def _load_level() -> None:
     world = unreal.EditorLoadingAndSavingUtils.load_map(LEVEL_PATH)
     if not world:
         raise RuntimeError(f"Failed to load map: {LEVEL_PATH}")
+    return world
 
 
 def _verify_class_defaults() -> None:
-    for bp_path, prop in CLASS_DEFAULT_CHECKS:
+    for bp_path, prop, expected_path in CLASS_DEFAULT_CHECKS:
         bp_class = unreal.EditorAssetLibrary.load_blueprint_class(bp_path)
         if not bp_class:
             raise RuntimeError(f"Missing blueprint class: {bp_path}")
@@ -112,12 +131,29 @@ def _verify_class_defaults() -> None:
         value = cdo.get_editor_property(prop)
         if not value:
             raise RuntimeError(f"Class default missing: {bp_path}.{prop}")
-        unreal.log(f"Class default OK: {bp_path}.{prop} -> {_path_or_none(value)}")
+        actual_path = _path_or_none(value)
+        if actual_path != expected_path:
+            raise RuntimeError(
+                f"Class default mismatch: {bp_path}.{prop} -> {actual_path} (expected {expected_path})"
+            )
+        unreal.log(f"Class default OK: {bp_path}.{prop} -> {actual_path}")
+
+
+def _verify_world_settings(world) -> None:
+    world_settings = world.get_world_settings()
+    for prop, expected_path in EXPECTED_WORLD_SETTINGS.items():
+        actual = world_settings.get_editor_property(prop)
+        actual_path = _path_or_none(actual)
+        if actual_path != expected_path:
+            raise RuntimeError(
+                f"World setting mismatch: {prop} -> {actual_path} (expected {expected_path})"
+            )
+        unreal.log(f"World setting OK: {prop} -> {actual_path}")
 
 
 def run() -> None:
     unreal.log("=== SignalProject level-binding validation start ===")
-    _load_level()
+    world = _load_level()
 
     actors = {key: _find_by_label(label) for key, label in ACTOR_LABELS.items()}
 
@@ -156,6 +192,7 @@ def run() -> None:
     _expect_ref(actors["air"], "GameFlowManagerRef", actors["flow"])
     _expect_asset_path(actors["air"], "SystemCopyTable", EXPECTED_TABLES["system"])
 
+    _verify_world_settings(world)
     _verify_class_defaults()
 
     unreal.log("Level actor labels found exactly once and deterministic refs validated.")
