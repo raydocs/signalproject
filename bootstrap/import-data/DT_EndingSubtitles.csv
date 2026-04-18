@@ -1,0 +1,9 @@
+EndingId,SequenceOrder,Text
+BadEnding,1,"你把异常都交给了主管。"
+BadEnding,2,"问题确实都被处理掉了。"
+BadEnding,3,"你的工作也越来越顺。"
+BadEnding,4,"你的话越来越少。"
+GoodEnding,1,"你开始自己处理那些“不该存在”的问题。"
+GoodEnding,2,"聊天框里出现了本不该出现的话。"
+GoodEnding,3,"有人还留在里面。"
+GoodEnding,4,"或者说，只剩下那些东西留在里面。"

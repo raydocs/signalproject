@@ -1,0 +1,14 @@
+LineId,DayIndex,UseCase,SpeakerId,Text,Weight
+SUP_D1_INTRO_01,1,MorningIntro,Supervisor,"早，今天先把当前这个需求过一遍，别紧张，按节奏来。",1
+SUP_D1_INTRO_02,1,MorningIntro,Supervisor,"今天任务不重，把手上的链路先跑顺，下午给我一个简要进度就行。",1
+SUP_D1_THREAD_01,1,ChatThread,Supervisor,"先看一下今天的任务安排。",1
+SUP_D1_THREAD_02,1,ChatThread,Supervisor,"把依赖关系理顺，下午给我一句话进度。",1
+SUP_D1_REPORT_01,1,ReportAck,Supervisor,"好，看到了，继续。",1
+SUP_D2_INTRO_01,2,MorningIntro,Supervisor,"昨天节奏不错，今天继续。把依赖关系梳干净，别让小问题拖到晚上。",1
+SUP_D2_INTRO_02,2,MorningIntro,Supervisor,"今天我盯一下节点，你先把该对齐的内容对齐，别分心。",1
+SUP_D2_ANOMALY_01,2,AnomalyResponse,Supervisor,"收到，我来协调，你继续手头的工作。",1
+SUP_D2_ANOMALY_02,2,AnomalyResponse,Supervisor,"这个问题不用你分心，我已经同步处理。",1
+SUP_D2_REPORT_01,2,ReportAck,Supervisor,"可以，这个节奏没问题。",1
+SUP_D3_INTRO_01,3,MorningIntro,Supervisor,"今天进度要再往前顶一点，我下午要同步上面。",1
+SUP_D3_INTRO_02,3,MorningIntro,Supervisor,"别让线上问题堆起来，先把最明显的几个点压住。",1
+SUP_D3_REPORT_01,3,ReportAck,Supervisor,"收到，我待会儿同步给上面。",1

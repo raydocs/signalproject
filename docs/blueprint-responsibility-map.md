@@ -1,345 +1,517 @@
 # Signal Project 蓝图职责与通信关系
 
-> 目标：在“蓝图类清单”基础上，进一步明确职责边界，防止 Unreal 项目常见的 Manager 重叠和 Widget/Actor 互相绑死。
+> **切片权威说明（Authoritative for Slice Ownership）**
+> - 本文是 `48 小时竖切片` 的 `运行时 ownership / phase authority / ref 传递` 权威文档。
+> - 若本文与 `docs/vertical-slice-scope.md`、`docs/game-state-machine.md`、`docs/interaction-spec.md` 冲突，以那三份切片契约文档为准。
+> - 若本文与其他实现文档冲突，则以本文为准，再由本文约束 `vertical-slice-18-blueprints-implementation-spec`、`vertical-slice-blueprint-wiring-order`、`blueprint-pseudonode-flowcharts`。
 
 ---
 
-## 1. 总体原则
+## 1. 切片必须遵守的 ownership 原则
 
-必须遵守三条规则：
+必须锁死这几条：
 
-1. `Manager` 决定流程，不直接画 UI
-2. `Widget` 负责显示和输入，不负责推进核心剧情状态
-3. `World Actor` 负责自己的交互和表现，不负责全局游戏流程
+1. `BP_SignalGameFlowManager` 是 **唯一** 可以写入 `CurrentPhase` 的对象。
+2. `Manager` 负责状态和流程，`Widget` 只负责显示和输入转发。
+3. 切片运行时使用的核心 manager actor 都是 **放在关卡里的 level actor**。
+4. level actor 之间的核心引用采用 **Instance Editable + 手动拖拽赋值**。
+5. Widget 引用必须由 **创建者以 Expose on Spawn 方式在 `Create Widget` 节点上传入**。
+6. `GetAllActorsOfClass` 只允许作为调试 / fallback，不是规范实现路径。
 
 ---
 
-## 2. 核心蓝图职责边界
+## 2. 切片权威 ownership 总表
 
-## 2.1 BP_SignalGameFlowManager
+## 2.1 Level-owned actors（放在 `LV_ApartmentMain`）
 
-### 负责
+这些对象在切片里是关卡中真实存在的 actor，并且跨 actor 引用要在关卡里手动指定：
 
-- 当前天数
-- 当前主状态 `E_GamePhase`
-- 当天流程推进
-- 状态切换统一入口
-- 检查是否进入 Reveal / Ending
-
-### 不负责
-
-- 不直接操作具体 Widget 布局细节
-- 不直接控制具体交互物件动画
-- 不直接生成聊天消息内容
-
-### 依赖
-
+- `BP_SignalGameFlowManager`
 - `BP_RouteStateManager`
 - `BP_AnomalyManager`
-- `BP_ReportManager`
-- `BP_SignalHUDManager`
+- `BP_ChatConversationManager`
+- `BP_MinigameManager`
+- `BP_HiddenDialogueUnlocker`
+- `BP_ComputerTerminal`
+- `BP_AirConditionerUnit`
+- 以及本关卡已有的房间 / day / 场景辅助 actor（若本轮切片真的在用）
+
+## 2.2 PlayerController-owned widgets
+
+以下 widget 在切片中由 `BP_SignalPlayerController` 创建、缓存、显示、隐藏：
+
+- `WBP_DesktopRoot`
+- `WBP_EndingTitleCard`
+
+## 2.3 DesktopRoot-owned app children
+
+以下 widget 的显示容器与 app 切换权归 `WBP_DesktopRoot`：
+
+- `WBP_ChatApp`
+- `WBP_ReportEditor`
+- 当前小游戏 widget（切片中即 `WBP_MG_DependencyMatch`）
+
+> 说明：小游戏 widget 可以由 `BP_MinigameManager` 创建并传入引用，但一旦进入桌面内容区，显示承载者仍是 `WBP_DesktopRoot.AppContentHost`。
+
+## 2.4 MinigameManager-owned modal popup
+
+以下临时 modal 的生命周期归 `BP_MinigameManager`：
+
+- `WBP_AnomalyChoicePopup`
+
+原因：
+
+- 它是由小游戏中断触发的 modal
+- 它的显示 / 移除 / 暂停 / 恢复都和小游戏状态强相关
+- 它不应该由 HUD manager 或杂项 actor 接管
 
 ---
 
-## 2.2 BP_RouteStateManager
+## 3. 权威状态 ownership
+
+## 3.1 `BP_SignalGameFlowManager`
 
 ### 负责
 
-- 记录玩家走了多少次汇报路线
-- 记录已解锁多少隐藏 Skill
-- 判断好结局/坏结局条件相关的中间状态
+- `CurrentDayIndex`
+- `CurrentPhase`
+- phase 切换唯一入口：`RequestPhaseChange(NewPhase)`
+- phase 进入后的输入 / UI / app 打开协调
+- `ReportPhase` 是否允许进入
+- 报告提交后的切片结尾触发
 
 ### 不负责
 
-- 不决定具体何时播结局演出
+- 不直接存聊天内容
+- 不直接存异常权重
+- 不直接存隐藏选项列表
+- 不直接构建 Widget 布局
 
-### 通信
+### 权威约束
 
-- 被 `BP_SignalGameFlowManager` 查询
-- 被 `BP_HiddenDialogueUnlocker` 更新
+- 任何对象都 **不能自己 Set `CurrentPhase`**
+- 所有 phase 变化都必须经过 `RequestPhaseChange`
+- `RequestPhaseChange(NewPhase)` 若 `NewPhase == CurrentPhase`，则必须是 `No-op`
 
----
-
-## 2.3 BP_AnomalyManager
+## 3.2 `BP_RouteStateManager`
 
 ### 负责
 
-- 异常积累
-- 异常触发判断
-- 当前异常类型
-- 通知 UI 和世界层做异常表现
+- `ReportSupervisor` / `HandleMyself` 路线记录
+- 路线计数
+- 同事 A 隐藏线解锁状态
+- 结尾查询所需的路线结果
 
 ### 不负责
 
-- 不直接控制小游戏具体玩法规则
-- 不直接负责房间中每个 Actor 如何表现
+- 不切 phase
+- 不解析 anomaly
+- 不创建 UI
 
-### 通信
-
-- 向 `BP_AnomalyEffectRouter` 广播
-- 向 `BP_AnomalyChoiceDirector` 发起分支选择
-- 接收 `BP_ChatConversationManager` 的副作用累计事件
-
----
-
-## 2.4 BP_AnomalyEffectRouter
+## 3.3 `BP_AnomalyManager`
 
 ### 负责
 
-- 把“异常类型”拆发给：
-  - 世界效果
-  - UI overlay
-  - 当前小游戏
+- `CurrentAnomalyType`
+- `bAnomalyActive`
+- 异常权重累计
+- `FREEZE` 的触发与解除
 
 ### 不负责
 
-- 不决定异常何时开始和结束
+- 不决定 `CurrentPhase`
+- 不直接创建结尾 / 报告 UI
+- 不直接决定隐藏选项显示样式
 
----
+### 权威约束
 
-## 2.5 BP_RoomStateManager
+- `TriggerAnomaly(Type)` 若 `bAnomalyActive == true`，必须直接忽略
+- 切片里真正执行的 anomaly 只有 `FREEZE`
+
+## 3.4 `BP_ChatConversationManager`
 
 ### 负责
 
-- 3D 房间灯光态
-- 房间环境材质态
-- 异常期间世界层反馈
+- `ConversationHistory`
+- `HiddenOptions`
+- 当前聊天目标
+- 发送消息后的回复注入
+- 隐藏选项注入与隐藏对话播放
 
 ### 不负责
 
-- 不决定剧情走向
-- 不决定隐藏对话是否解锁
+- 不拥有 `CurrentPhase`
+- 不直接打开报告或结尾
+- 不直接决定小游戏 modal 生命周期
 
-### 通信
+### 权威约束
 
-- 接收 `BP_AnomalyEffectRouter`
-- 接收 `BP_DayStateDirector`
+- `InjectHiddenOption(OptionRecord)` 必须按 `OptionId` 去重
+- `ReportSupervisor` 路线下不应注入切片隐藏选项
 
----
-
-## 2.6 BP_DayStateDirector
+## 3.5 `BP_MinigameManager`
 
 ### 负责
 
-- 每一天的房间基础状态
-- 非异常下的日级别变化：布景、光照、压迫感升级
+- 当前小游戏类型
+- 当前小游戏 widget 的运行引用
+- 小游戏暂停 / 恢复 / 完成
+- `WBP_AnomalyChoicePopup` 的创建、缓存、移除
+- 异常选择后的分支协调
 
 ### 不负责
 
-- 不负责即时异常
+- 不拥有 `CurrentPhase`
+- 不直接决定结尾
+- 不直接修改聊天历史
 
-### 边界说明
+### 权威约束
 
-- `BP_DayStateDirector` 管“这一天的静态基线”
-- `BP_RoomStateManager` 管“当前异常和瞬时状态”
+- 选择 `Report Supervisor` 时，必须：
+  1. 记录路线
+  2. 要求 `BP_AnomalyManager` 解除异常
+  3. 移除 popup
+  4. 恢复 / 收束小游戏
+  5. 只有在小游戏闭合后才进入 `ReportPhase`
+- 选择 `Handle Myself` 时，必须：
+  1. 记录路线
+  2. 移除 popup
+  3. 关闭 / 退出小游戏显示
+  4. 请求 `BP_SignalGameFlowManager` 进入 `HandleAnomaly3D`
 
----
-
-## 2.7 BP_ChatConversationManager
+## 3.6 `BP_HiddenDialogueUnlocker`
 
 ### 负责
 
-- 对话线程数据
-- 发送消息后插入回复
-- 根据同事 ID 累积 anomaly side effect
-- 决定隐藏选项何时注入
+- “自己处理成功后”解锁隐藏选项
+- 更新对应同事的 route / unlock 状态
 
 ### 不负责
 
-- 不直接绘制聊天 UI
-- 不直接决定全局状态跳转
-
-### 通信
-
-- Widget 输入发给它
-- 它把数据交给 `WBP_ChatApp`
-- 它向 `BP_AnomalyManager` 报告 side effect
+- 不负责 anomaly 触发
+- 不负责 `CurrentPhase`
+- 不负责报告提交
 
 ---
 
-## 2.8 WBP_ChatApp
+## 4. Widget 权威边界
+
+## 4.1 `WBP_DesktopRoot`
 
 ### 负责
 
-- 展示聊天列表和消息线程
-- 接收玩家点击和输入
-- 调用 `BP_ChatConversationManager`
+- 桌面模式根容器
+- app 切换
+- `Chat` / `Report` / 当前小游戏 widget 的显示承载
+- 正常桌面状态下的按钮启用 / 禁用表现
 
 ### 不负责
 
-- 不持有全局剧情逻辑
-- 不自己计算异常
+- 不拥有 `CurrentPhase`
+- 不自己决定何时允许 `ReportPhase`
+- 不自己决定分支后果
 
----
+### 权威约束
 
-## 2.9 BP_MinigameManager
+- `Chat` / `Report` 按钮点击后，必须请求 `BP_SignalGameFlowManager` 进入对应 phase，而不是直接把 app 打开当成全局状态变化
+- `Report` 按钮是否可用，必须由 `BP_SignalGameFlowManager` 的可进入条件决定
+- `DesktopRoot.OpenApp(...)` 是渲染函数，不是 phase owner
+
+## 4.2 `WBP_ChatApp`
 
 ### 负责
 
-- 挑选当前小游戏
-- 加载对应小游戏 Widget
-- 判断小游戏完成 / 失败 / 中断
+- 联系人切换
+- 消息显示
+- 发送输入
+- 隐藏选项点击
 
 ### 不负责
 
-- 不负责异常触发条件本身
+- 不直接 `RequestPhaseChange`
+- 不直接设置路线计数
+- 不自己决定异常是否触发
 
-### 通信
-
-- 被 `BP_SignalGameFlowManager` 调用开始
-- 被 `BP_AnomalyManager` 中断至 `AnomalyChoice`
-
----
-
-## 2.10 BP_ReportManager
+## 4.3 `WBP_AnomalyChoicePopup`
 
 ### 负责
 
-- 日报选项池
-- 句子解锁规则
-- 提交结果判定
+- 展示 `Report Supervisor / Handle Myself` 两个按钮
+- 把按钮意图转发给 `BP_MinigameManager`
 
 ### 不负责
 
-- 不负责最终结局演出
+- 不自己写 `CurrentPhase`
+- 不直接 `ResolveCurrentAnomaly`
+- 不直接 `ResumeMinigame`
+- 不自己判断何时进入 `ReportPhase`
 
----
+### 权威约束
 
-## 2.11 BP_HiddenDialogueUnlocker
+- popup 按钮点击后，只做“通知 owning manager”
+- popup 不能绕过 manager 直接写全局状态
+
+## 4.4 `WBP_ReportEditor`
 
 ### 负责
 
-- 在玩家成功自己处理异常后
-- 为对应同事注入隐藏选项
-- 更新 route/skill 解锁状态
+- 显示句子池
+- 记录当前选择
+- 把 `Submit` 输入转交给 `BP_SignalGameFlowManager`
 
 ### 不负责
 
-- 不负责异常触发本身
+- 不自己决定 `Good / Bad` ending
+- 不自己创建 `WBP_EndingTitleCard`
+- 不自己推进 `CurrentPhase`
 
----
+### 权威约束
 
-## 2.12 BP_SupervisorRevealDirector
+- 未选句子时不可提交
+- 当日链路未闭合时不可打开
+- `HandleMyself` 路线下，隐藏对话未完成前不可打开
+
+## 4.5 `WBP_EndingTitleCard`
 
 ### 负责
 
-- Day 6 揭露演出流程
-- UI 破损、标签显示、主管头像变化
+- 显示结尾标题与字幕
+- 提供重试 / 退出输入
 
 ### 不负责
 
-- 不负责整个游戏的天数推进
+- 不决定路线结果
+- 不决定何时进入 `EndingSequence`
 
 ---
 
-## 2.13 BP_SignalPlayerController
+## 5. World actor 权威边界
+
+## 5.1 `BP_ComputerTerminal`
 
 ### 负责
 
-- 输入模式切换
-- 鼠标显示/隐藏
-- UI 焦点切换
-- 角色输入禁用/恢复
+- 响应 3D 交互
+- 在条件允许时请求进入 `DesktopIdle`
 
 ### 不负责
 
-- 不决定剧情分支
+- 不自己显示 / 创建桌面 widget
+- 不自己切输入模式
+- 不自己 Set `CurrentPhase`
 
----
+### 权威约束
 
-## 2.14 BP_ComputerTerminal / BP_AirConditionerUnit 等交互物
+- 电脑能否进入，必须只由 `BP_SignalGameFlowManager.CanEnterDesktop()` 决定
+- 成功交互后，应请求 `BP_SignalGameFlowManager.RequestPhaseChange(DesktopIdle)`
+
+## 5.2 `BP_AirConditionerUnit`
 
 ### 负责
 
-- 接收玩家交互
-- 执行自身表现
-- 向流程层发送“我被使用了”的事件
+- 作为 `FREEZE` 的唯一 3D 解决目标
+- 在 `HandleAnomaly3D` 时响应交互
+- 成功后通知 anomaly 解除与隐藏线解锁
 
 ### 不负责
 
-- 不保存全局状态
-- 不决定后续剧情是否进入结局
+- 不自己把玩家弹回桌面
+- 不自己决定结尾
+- 不自己写 `CurrentPhase`
+
+### 权威约束
+
+- 交互成功后，应：
+  1. `ResolveCurrentAnomaly`
+  2. `UnlockForColleague(ColleagueA)`
+  3. 请求 `BP_SignalGameFlowManager.RequestPhaseChange(RoomExplore)`
+- 之后玩家必须手动回电脑，不允许空调直接把 phase 送进 `DesktopIdle`
 
 ---
 
-## 3. 推荐通信方向
+## 6. 切片 reference-acquisition 规范
 
-推荐使用这个方向：
+## 6.1 Level actor 之间
+
+规范做法：
+
+- 把核心 manager actor 放进 `LV_ApartmentMain`
+- 把需要的 cross-ref 设为 `Instance Editable`
+- 在关卡里手动拖拽赋值
+
+切片里应手动指定的典型引用：
+
+- `BP_SignalGameFlowManager`
+  - `RouteStateManagerRef`
+  - `AnomalyManagerRef`
+  - `ChatConversationManagerRef`
+  - `MinigameManagerRef`
+  - `HiddenDialogueUnlockerRef`
+- `BP_AnomalyManager`
+  - `GameFlowManagerRef`
+  - `MinigameManagerRef`
+- `BP_ChatConversationManager`
+  - `AnomalyManagerRef`
+  - `RouteStateManagerRef`
+- `BP_MinigameManager`
+  - `GameFlowManagerRef`
+  - `AnomalyManagerRef`
+  - `RouteStateManagerRef`
+- `BP_HiddenDialogueUnlocker`
+  - `ChatConversationManagerRef`
+  - `RouteStateManagerRef`
+- `BP_ComputerTerminal`
+  - `GameFlowManagerRef`
+- `BP_AirConditionerUnit`
+  - `GameFlowManagerRef`
+  - `AnomalyManagerRef`
+  - `HiddenDialogueUnlockerRef`
+
+## 6.2 PlayerController 引用来源
+
+`BP_SignalPlayerController` 不是 level-placed actor，所以它的 manager refs 不采用关卡手拖。
+
+切片规范做法：
+
+- `BP_SignalGameFlowManager.InitializeGameFlow` 在 BeginPlay 时缓存 `BP_SignalPlayerController`
+- 然后由 `BP_SignalGameFlowManager` 把切片需要的 manager refs 注册给 PlayerController
+
+## 6.3 Widget 引用来源
+
+Widget 不能自己到世界里搜 manager。
+
+规范做法：
+
+- `BP_SignalPlayerController` 创建 `WBP_DesktopRoot` / `WBP_EndingTitleCard` 时，用 `Expose on Spawn` 传 refs
+- `WBP_DesktopRoot` 创建 `WBP_ChatApp` / `WBP_ReportEditor` 时，用 `Expose on Spawn` 传 refs
+- `BP_MinigameManager` 创建 `WBP_MG_DependencyMatch` / `WBP_AnomalyChoicePopup` 时，用 `Expose on Spawn` 传 refs
+
+## 6.4 `GetAllActorsOfClass` 规则
+
+- 调试时可临时使用
+- 文档中的切片 **规范实现** 不以它为默认路径
+- 一旦主链跑通，应把它替换为手动 refs / creator injection
+
+---
+
+## 7. 切片权威通信方向
+
+规范方向：
 
 ```text
 Player Input
- -> PlayerController
+ -> PlayerController / Character
  -> Widget or Interactable
- -> Manager Layer
- -> GameFlowManager / State Managers
- -> back to UI / World presentation
+ -> Owning Manager
+ -> BP_SignalGameFlowManager（如需 phase 变化）
+ -> PlayerController / DesktopRoot / World presentation
 ```
 
-不要让通信变成：
+不要这样做：
 
-- Widget 直接强改 World Actor
-- World Actor 直接创建结局 UI
-- 小游戏 Widget 直接改全局天数
+- `Widget -> 直接 Set CurrentPhase`
+- `World Actor -> 直接 Create Ending UI`
+- `WBP_ReportEditor -> 直接判定 Good/Bad ending 并播结尾`
+- `WBP_AnomalyChoicePopup -> 直接 ResumeMinigame + 直接改 phase`
 
 ---
 
-## 4. 常见通信案例
+## 8. 切片关键通信案例（冻结版）
 
-## 4.1 玩家点击发送聊天消息
+## 8.1 玩家用电脑进入桌面
 
 ```text
-WBP_ChatApp
- -> BP_ChatConversationManager.SendMessage()
- -> BP_AnomalyManager.Accumulate()
- -> WBP_ChatApp refresh thread
+BP_ComputerTerminal.Interact()
+ -> BP_SignalGameFlowManager.RequestPhaseChange(DesktopIdle)
+ -> BP_SignalGameFlowManager.HandlePhaseEntered(DesktopIdle)
+ -> BP_SignalPlayerController.ShowDesktopRoot()
+ -> BP_SignalPlayerController.SetDesktopInputMode()
 ```
 
-## 4.2 小游戏中触发异常
+## 8.2 小游戏中触发异常
 
 ```text
-BP_MinigameManager / minigame widget
- -> BP_AnomalyManager.TriggerAnomaly()
- -> BP_AnomalyChoiceDirector.OpenChoice()
+BP_MinigameManager.StartMinigame()
+ -> BP_SignalGameFlowManager.RequestPhaseChange(MinigameActive)
+ -> BP_AnomalyManager.ResolveDominantAnomaly()
+ -> BP_AnomalyManager.TriggerAnomaly(FREEZE)
+ -> BP_MinigameManager.HandleAnomalyTriggered(FREEZE)
+ -> BP_SignalGameFlowManager.RequestPhaseChange(AnomalyChoice)
  -> WBP_AnomalyChoicePopup shown
 ```
 
-## 4.3 玩家选择自己处理
+## 8.3 玩家选择 `Report Supervisor`
 
 ```text
-WBP_AnomalyChoicePopup
- -> BP_SignalGameFlowManager.RequestPhaseChange(HandleAnomaly3D)
- -> PlayerController switch input mode
- -> RoomStateManager enable anomaly world state
+WBP_AnomalyChoicePopup.ReportButton
+ -> BP_MinigameManager.HandleAnomalyChoice(ReportSupervisor)
+ -> BP_RouteStateManager.RecordRouteChoice(ReportSupervisor)
+ -> BP_AnomalyManager.ResolveCurrentAnomaly()
+ -> BP_SignalGameFlowManager.RequestPhaseChange(MinigameActive)
+ -> BP_MinigameManager.Resume / Complete Minigame
+ -> [小游戏闭合后]
+ -> BP_SignalGameFlowManager.RequestPhaseChange(ReportPhase)
 ```
 
-## 4.4 玩家修好空调
+## 8.4 玩家选择 `Handle Myself`
+
+```text
+WBP_AnomalyChoicePopup.HandleButton
+ -> BP_MinigameManager.HandleAnomalyChoice(HandleMyself)
+ -> BP_RouteStateManager.RecordRouteChoice(HandleMyself)
+ -> BP_SignalGameFlowManager.RequestPhaseChange(HandleAnomaly3D)
+ -> BP_SignalPlayerController.HideDesktopRoot()
+ -> BP_SignalPlayerController.SetRoomInputMode()
+```
+
+## 8.5 玩家修好空调
 
 ```text
 BP_AirConditionerUnit.Interact()
  -> BP_AnomalyManager.ResolveCurrentAnomaly()
- -> BP_HiddenDialogueUnlocker.UnlockForColleague(A)
- -> BP_SignalGameFlowManager return to DesktopIdle
+ -> BP_HiddenDialogueUnlocker.UnlockForColleague(ColleagueA)
+ -> BP_SignalGameFlowManager.RequestPhaseChange(RoomExplore)
+ -> [玩家手动走回电脑]
+ -> BP_ComputerTerminal.Interact()
+ -> DesktopIdle / ChatActive
+```
+
+## 8.6 提交报告并播结尾
+
+```text
+WBP_ReportEditor.Submit
+ -> BP_SignalGameFlowManager.SubmitSliceReport(SelectedSentenceId)
+ -> BP_SignalGameFlowManager.TriggerEnding(EndingType)
+ -> BP_SignalGameFlowManager.RequestPhaseChange(EndingSequence)
+ -> BP_SignalPlayerController.ShowEndingTitleCard(EndingType) [由 HandlePhaseEntered 触发]
 ```
 
 ---
 
-## 5. 48 小时切片的最小职责骨架
+## 9. 切片 edge rules（ownership 版）
 
-切片版本最少先建这些：
+以下规则这四份实现文档都必须一致：
 
-- `BP_SignalGameFlowManager`
-- `BP_SignalPlayerController`
-- `BP_SignalPlayerCharacter`
-- `BP_ComputerTerminal`
-- `BP_AirConditionerUnit`
-- `BP_AnomalyManager`
-- `BP_RouteStateManager`
-- `BP_ChatConversationManager`
-- `BP_MinigameManager`
+- 重复 `RequestPhaseChange(CurrentPhase)` 是 `No-op`
+- `TriggerAnomaly` 在 `bAnomalyActive == true` 时忽略
+- `InjectHiddenOption` 按 `OptionId` 去重
+- `WBP_ReportEditor` 未选句子不可提交
+- `ReportPhase` 在小游戏 / 异常 / 隐藏对话链未闭合前不可进入
+- `ReportSupervisor` 路线不会解锁隐藏选项
+- `HandleMyself` 路线不会绕过 `RoomExplore` 自动回桌面
+
+---
+
+## 10. 本轮切片明确不作为 authority 的对象
+
+以下对象即使存在于完整版文档，也不是本轮切片 ownership 的一部分：
+
 - `BP_ReportManager`
-- `WBP_DesktopRoot`
-- `WBP_ChatApp`
-- `WBP_AnomalyChoicePopup`
-- `WBP_ReportEditor`
+- `BP_AnomalyChoiceDirector`
+- `BP_AnomalyEffectRouter`
+- `BP_SignalHUDManager`
+- `BP_RoomStateManager`
+- `BP_DayStateDirector`
+- `BP_SupervisorRevealDirector`
 
-这套就够打通第一版闭环。
+它们可以留在完整版规划里，但在 48 小时切片里不应成为实现依赖。

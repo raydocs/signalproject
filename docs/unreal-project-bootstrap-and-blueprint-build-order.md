@@ -1,7 +1,65 @@
 # Signal Project Unreal 工程初始化清单 + 全量蓝图创建顺序
 
+> **完整版参考说明（Full-version Reference; not slice authority）**
+> - 本文保留 `Signal` 完整版工程初始化思路、长期目录结构和全量蓝图创建顺序。
+> - 对 `48 小时竖切片` 而言，**本文不是最高优先级实现契约**。
+> - 切片开工时应优先遵循：
+>   - `docs/vertical-slice-scope.md`
+>   - `docs/game-state-machine.md`
+>   - `docs/interaction-spec.md`
+>   - `docs/vertical-slice-18-blueprints-implementation-spec.md`
+>   - `docs/vertical-slice-blueprint-wiring-order.md`
+>   - `docs/blueprint-variables-events-and-data-fields.md`
+>   - `docs/day1-day3-datatable-ready-script.md`
+> - 若本文与上述切片权威文档冲突，以切片权威文档为准。
+>
 > 目标：让团队可以从 0 开始，按顺序创建 Unreal 工程、目录、基础数据、核心蓝图、UI 和交互骨架。
 > 原则：先搭“能跑的骨架”，再补内容和表现。
+
+---
+
+## 0. 竖切片开工闸门（Kickoff Gates）
+
+### 0.1 这份文档在切片开工时怎么用
+
+对 48 小时竖切片，本文件现在只承担三种作用：
+
+- 提供 Unreal 工程初始化与目录搭建参考
+- 提供完整版长期 build-order 总表
+- 作为切片开工时的“哪些工作现在就能做 / 哪些工作必须依赖冻结契约”的闸门说明
+
+### 0.2 现在可立即开做（Safe to Start Immediately）
+
+在当前仓库里，Work Items 1-3 已完成，因此以下工作可以直接开始：
+
+1. Unreal 工程创建与基础配置
+2. `Content/Signal/` 目录与子目录搭建
+3. 按冻结命名创建切片所需枚举、Struct、DataTable 资产
+4. 创建 `Levels/Gameplay/LV_ApartmentMain` 与基础测试关卡
+5. `LV_ApartmentMain` 白盒搭建：玩家出生点、基础灯光、电脑工位、空调占位
+6. 创建切片 18 个对象的空壳 Blueprint / Widget
+7. 按冻结 widget 名称创建桌面 / 聊天 / 报告 / 结尾的 UI shell
+
+> 上述“命名冻结”与“最小必建项”以 `blueprint-variables-events-and-data-fields.md` 和 `vertical-slice-18-blueprints-implementation-spec.md` 为准，不以本文旧版完整版清单为准。
+
+### 0.3 历史上被 contract freeze 阻塞、现在才允许开的工作
+
+以下工作在 Work Items 1-3 完成前不应启动；现在因为契约已冻结，才算正式解锁：
+
+- `CurrentPhase` 切换与状态机 wiring
+- manager / widget / world actor 的引用获取与 ownership wiring
+- DataTable 导入与消费方 hookup
+- `FREEZE` 分支行为、隐藏对话 gate、报告与结尾判定
+- anomaly / report / ending 的完整切片调用链
+
+### 0.4 切片开工时不要从本文直接抄的内容
+
+本文下方仍保留完整版内容，因此 **不要把以下内容直接当作切片 must-build 清单**：
+
+- Day 4-Day 7 专用系统
+- `BLACKOUT` / `DISKCLEAN` 执行链
+- `BP_ReportManager`、`BP_AnomalyChoiceDirector`、`BP_SignalHUDManager` 等完整版对象
+- 与切片 schema 文档不一致的旧 Struct / DataTable 名称
 
 ---
 
@@ -88,9 +146,12 @@
 
 ---
 
-## 4. 第一批必须创建的基础资源
+## 4. 第一批必须创建的基础资源（完整版参考）
 
-这些资源必须最先建，不然蓝图没法接。
+这些资源是完整版总表里的“基础资源”参考，不等同于当前竖切片的最小必建集。
+
+- 竖切片最小必建枚举 / Struct / DataTable：以 `docs/blueprint-variables-events-and-data-fields.md` 为准。
+- 竖切片实际导入表与行内容：以 `docs/day1-day3-datatable-ready-script.md` 为准。
 
 ## 4.1 枚举创建顺序
 
@@ -123,7 +184,7 @@
 
 ---
 
-## 5. 关卡初始化顺序
+## 5. 关卡初始化顺序（完整版参考；切片按权威文档裁剪）
 
 ## 5.1 第一张主关卡
 
@@ -133,6 +194,8 @@
 
 ## 5.2 第一张测试关卡
 
+> 下列测试关卡是完整版 / 长期工程参考，不是当前竖切片必须一次性全部创建的列表。
+
 创建：
 
 - `Levels/Test/LV_Test_DesktopUI`
@@ -140,6 +203,9 @@
 - `Levels/Test/LV_Test_Minigame_DependencyMatch`
 
 ## 5.3 主关卡必须先摆的 Actor
+
+> 这里是完整版场景初始化参考，不是当前切片的强制 must-place 清单。
+> 对 48 小时竖切片，优先放置的对象以 `vertical-slice-18-blueprints-implementation-spec.md` 和相关 level / routing 文档为准；像 `BP_DayStateDirector` 这类完整版 actor 不应被误认为当前 slice 前置条件。
 
 - 玩家出生点
 - 基础灯光
@@ -152,9 +218,14 @@
 
 ---
 
-## 6. 全量蓝图创建顺序
+## 6. 全量蓝图创建顺序（完整版参考）
 
-这里不是“推荐想法”，而是我建议你们真按这个顺序建。
+这里保留的是 **完整版工程** 的全量 build order，不是 48 小时竖切片的权威 must-build 顺序。
+
+如果目标是当前竖切片实现，请优先看：
+
+- `docs/vertical-slice-18-blueprints-implementation-spec.md`
+- `docs/vertical-slice-blueprint-wiring-order.md`
 
 ## Phase 1：骨架层
 
@@ -400,9 +471,11 @@
 
 如果你们真的只剩 48 小时，不要全建完再做功能。
 
+> 本节是切片 kickoff 摘要；具体对象 ownership、wiring 顺序、字段命名和 DataTable 范围，分别以切片权威文档为准。
+
 切片实战顺序应为：
 
-1. 枚举、Struct、DataTable
+1. 按冻结命名创建枚举、Struct、DataTable
 2. `BP_SignalGameMode`
 3. `BP_SignalPlayerController`
 4. `BP_SignalPlayerCharacter`
@@ -493,10 +566,11 @@
 
 如果目标真的是 48 小时交一版，正确做法不是“按完整蓝图表全建完”，而是：
 
-- 用这份文档当完整总表
-- 但实际执行只跑 `第 7 节切片实际创建顺序`
+- 用这份文档当 **完整版参考总表**
+- 但实际执行优先遵循 `切片权威文档 + 第 0 节开工闸门 + 第 7 节切片实际创建顺序`
 
 也就是说：
 
 - 完整表用来保证未来不会乱
-- 切片顺序用来保证现在交得出来
+- 切片权威文档用来保证当前不会跑偏
+- 第 0 节闸门用来保证团队知道哪些工作现在就能开始，哪些工作必须在冻结契约之后再做

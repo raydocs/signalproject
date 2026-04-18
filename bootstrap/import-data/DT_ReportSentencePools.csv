@@ -1,0 +1,9 @@
+SentenceId,DayIndex,SourceColleague,UnlockRequirement,StrengthScore,bIsFinalInjection,Text
+REP_D1_01,1,Supervisor,0,0.10,false,"今天已完成基础排查，主流程可继续推进。"
+REP_D1_02,1,Supervisor,0,0.10,false,"当前依赖关系已梳理，暂无严重阻塞。"
+REP_D2_01,2,Supervisor,0,0.20,false,"今日问题已自行排除，主流程未受持续影响。"
+REP_D2_02,2,Supervisor,0,0.20,false,"已处理环境波动，当前任务可继续推进。"
+REP_D2_03,2,Supervisor,0,0.25,false,"部分异常来源尚不明确，但工作可继续。"
+REP_D3_01,3,Supervisor,0,0.25,false,"今日异常已归档，当前流程仍可继续推进。"
+REP_D3_02,3,Supervisor,0,0.30,false,"已完成阶段收束，剩余风险待后续确认。"
+REP_D3_03,3,ColleagueA,1,0.85,true,"有些异常并没有消失，它们只是被写成了可以继续。"

@@ -1,0 +1,5 @@
+DialogueId,DayIndex,ColleagueId,SequenceOrder,Text,bGlitchEnter,bGlitchExit
+A_HIDDEN_D2_01,2,ColleagueA,1,"空调调到 16.4 比较好睡。",true,false
+A_HIDDEN_D2_02,2,ColleagueA,2,"那个 bug 我之前定位过，在第三行。",false,false
+A_HIDDEN_D2_03,2,ColleagueA,3,"你那时候没在线。",false,false
+A_HIDDEN_D2_04,2,ColleagueA,4,"……你现在还在吗？",false,true

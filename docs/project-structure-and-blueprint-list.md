@@ -1,9 +1,54 @@
 # Signal Project Unreal Structure And Blueprint List
 
+> **Full-version reference note (not slice authority)**
+> - This document defines the **full-project architecture and long-term Blueprint inventory** for `Signal`.
+> - For the `48-hour vertical slice`, this file is **reference only** and should not override the frozen slice contract.
+> - Slice implementation authority lives in:
+>   - `docs/vertical-slice-scope.md`
+>   - `docs/game-state-machine.md`
+>   - `docs/interaction-spec.md`
+>   - `docs/vertical-slice-18-blueprints-implementation-spec.md`
+>   - `docs/vertical-slice-blueprint-wiring-order.md`
+>   - `docs/blueprint-variables-events-and-data-fields.md`
+>   - `docs/day1-day3-datatable-ready-script.md`
+> - If this file disagrees with those docs on exact object list, naming, ownership, branch behavior, executed anomaly scope, or DataTable/schema details, **the slice docs win**.
+>
 > Target: full-content version of `Signal`
 > Engine: Unreal Engine 5
 > Format: 3D explorable room + 2D desktop gameplay in UMG
 > Goal: define a production-ready project layout and the full Blueprint class list before implementation starts
+
+---
+
+## 0. How to use this document during slice kickoff
+
+### 0.1 Safe slice uses of this doc
+
+During slice implementation kickoff, this file is safe to use for:
+
+- long-term folder layout planning
+- Unreal naming-prefix conventions
+- understanding which systems may exist in the full version later
+- avoiding folder/class chaos while the slice is being built
+
+### 0.2 Things this doc is **not** authoritative for in the slice
+
+Do **not** use this file as the deciding source for:
+
+- the exact 18-object slice subset
+- whether `BLACKOUT` / `DISKCLEAN` execute in the slice
+- exact manager/widget ownership
+- exact route branch outcomes
+- exact enum/value names when other slice docs freeze them differently
+- exact DataTable names, row structs, or field names
+
+### 0.3 Practical kickoff rule
+
+If you are building the slice right now:
+
+1. use this doc for structure and long-term orientation
+2. use slice docs for actual implementation decisions
+3. treat any extra classes listed below as **future/full-version candidates**, not current must-build scope
 
 ---
 
@@ -163,6 +208,9 @@ Use consistent Unreal prefixes.
 ---
 
 ## 5. Full Blueprint Class List
+
+> Warning: the lists below intentionally include many full-version classes that are **not part of the current 48-hour slice must-build set**.
+> Use them as architecture reference only.
 
 ## 5.1 Core Framework Blueprints
 
@@ -381,6 +429,9 @@ Each minigame should have a root controller widget plus supporting widgets and l
 
 ## 6. Data Assets And Non-Blueprint Data Classes
 
+> Full-version reference only.
+> The slice-authoritative enum names, struct names, DataTable names, and row schemas now live in `docs/blueprint-variables-events-and-data-fields.md` and `docs/day1-day3-datatable-ready-script.md`.
+
 These are not all Blueprints, but the project will need them.
 
 ## 6.1 Enums
@@ -451,6 +502,9 @@ If you want to keep scope sane, most of the game can live in `LV_ApartmentMain`,
 
 ## 8. Build Order Recommendation
 
+> This is a full-project sequencing suggestion.
+> For the current slice kickoff, use `docs/vertical-slice-18-blueprints-implementation-spec.md` and `docs/vertical-slice-blueprint-wiring-order.md` as the authoritative build order.
+
 If the team uses this structure, the safest implementation order is:
 
 1. framework blueprints
@@ -469,6 +523,8 @@ If the team uses this structure, the safest implementation order is:
 ---
 
 ## 9. Minimum Full-Project Class Core
+
+> This section is about the **full project backbone**, not the vertical-slice minimum build.
 
 If you want to identify the absolute backbone classes before any expansion, these are the non-negotiable ones:
 
@@ -489,11 +545,13 @@ If you want to identify the absolute backbone classes before any expansion, thes
 
 ---
 
-## 10. Suggested Next Documents
+## 10. Suggested Next Documents (historical note)
 
-After this doc, the most useful planning docs are:
+When this file was first written, the most useful follow-up planning docs were:
 
 1. a `48-hour vertical slice blueprint subset`
 2. a `Day 1-Day 7 gameplay content sheet`
 3. a `widget wireframe and screen flow doc`
 4. a `state machine diagram for Room/Desktop/Choice/Report/Ending`
+
+Those documents now exist in the repository, so this section should be read as historical context rather than an active backlog.
