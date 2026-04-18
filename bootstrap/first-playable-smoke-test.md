@@ -31,7 +31,7 @@ Authority references:
 ### 2) Computer enter/exit and desktop ownership
 
 - [ ] Interacting with computer requests `RequestPhaseChange(DesktopIdle)`.
-- [ ] `WBP_DesktopRoot` is created/owned by `BP_SignalPlayerController`.
+- [ ] `WBP_DesktopRoot` is created/owned by `ASignalPlayerController` (or derived BP child).
 - [ ] Desktop input mode enables cursor and disables room movement.
 - [ ] Leave desktop (`LeaveDesktop`) works only in `DesktopIdle` / `ChatActive`.
 
@@ -40,13 +40,13 @@ Authority references:
 - [ ] Chat app opens through desktop root app host.
 - [ ] Sending message updates chat history.
 - [ ] Sending Colleague A message increases FREEZE weight.
-- [ ] Minigame starts via `BP_MinigameManager.StartMinigame(DependencyMatch)` and renders in `AppContentHost`.
+- [ ] Minigame starts via `AMinigameManager.StartMinigame(DependencyMatch)` and renders in desktop app host.
 
 ### 4) FREEZE trigger and popup
 
 - [ ] `FREEZE` popup appears once when threshold is met.
 - [ ] Duplicate trigger is ignored while `bAnomalyActive == true`.
-- [ ] Popup is created/owned by `BP_MinigameManager` and routes choice back to it.
+- [ ] Popup is created/owned by `AMinigameManager` and routes choice back to it.
 
 ### 5) Branch A: Report Supervisor
 

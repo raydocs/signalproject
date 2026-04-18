@@ -1,44 +1,38 @@
 AssetName,AssetKind,TargetPath,CreationMode,AuthorityDoc,BlockingFor,Notes
-SignalProject.uproject,ProjectFile,SignalProject.uproject,UnrealEditorGenerated,docs/unreal-project-bootstrap-and-blueprint-build-order.md,WI2,Blueprint-only UE5 project root
-DefaultEngine.ini,ConfigFile,Config/DefaultEngine.ini,UnrealEditorGenerated,docs/unreal-project-bootstrap-and-blueprint-build-order.md,WI2,Project engine defaults
-DefaultGame.ini,ConfigFile,Config/DefaultGame.ini,UnrealEditorGenerated,docs/unreal-project-bootstrap-and-blueprint-build-order.md,WI2,Project game defaults
-DefaultInput.ini,ConfigFile,Config/DefaultInput.ini,UnrealEditorGenerated,docs/unreal-project-bootstrap-and-blueprint-build-order.md,WI2,Must include Interact and LeaveDesktop mappings
-E_GamePhase,Enum,Content/Signal/Data/Enums/E_GamePhase.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,Frozen slice phase enum
-E_AnomalyType,Enum,Content/Signal/Data/Enums/E_AnomalyType.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,Frozen anomaly enum
-E_ColleagueId,Enum,Content/Signal/Data/Enums/E_ColleagueId.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,Frozen colleague enum
-E_SkillUnlockState,Enum,Content/Signal/Data/Enums/E_SkillUnlockState.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,Frozen unlock enum
-E_RouteBranch,Enum,Content/Signal/Data/Enums/E_RouteBranch.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,Frozen route enum
-E_MinigameType,Enum,Content/Signal/Data/Enums/E_MinigameType.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,Frozen minigame enum
-ST_ChatMessageRecord,Struct,Content/Signal/Data/Structs/ST_ChatMessageRecord.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,Runtime struct
-ST_HiddenOptionRecord,Struct,Content/Signal/Data/Structs/ST_HiddenOptionRecord.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,Runtime struct
-ST_SupervisorLineRow,Struct,Content/Signal/Data/Structs/ST_SupervisorLineRow.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,DataTable row struct
-ST_NormalReplyRow,Struct,Content/Signal/Data/Structs/ST_NormalReplyRow.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,DataTable row struct
-ST_HiddenDialogueRow,Struct,Content/Signal/Data/Structs/ST_HiddenDialogueRow.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,DataTable row struct
-ST_SystemCopyRow,Struct,Content/Signal/Data/Structs/ST_SystemCopyRow.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,DataTable row struct
-ST_ReportSentenceRow,Struct,Content/Signal/Data/Structs/ST_ReportSentenceRow.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,DataTable row struct
-ST_EndingSubtitleRow,Struct,Content/Signal/Data/Structs/ST_EndingSubtitleRow.uasset,UnrealEditorCreate,docs/blueprint-variables-events-and-data-fields.md,WI2,DataTable row struct
-DT_SystemCopy,DataTable,Content/Signal/Data/DataTables/DT_SystemCopy.uasset,UnrealEditorImport,docs/day1-day3-datatable-ready-script.md,WI2,Import from bootstrap/import-data/DT_SystemCopy.csv
-DT_SupervisorLines,DataTable,Content/Signal/Data/DataTables/DT_SupervisorLines.uasset,UnrealEditorImport,docs/day1-day3-datatable-ready-script.md,WI2,Import from bootstrap/import-data/DT_SupervisorLines.csv
-DT_NormalReplies,DataTable,Content/Signal/Data/DataTables/DT_NormalReplies.uasset,UnrealEditorImport,docs/day1-day3-datatable-ready-script.md,WI2,Import from bootstrap/import-data/DT_NormalReplies.csv
-DT_HiddenDialogues,DataTable,Content/Signal/Data/DataTables/DT_HiddenDialogues.uasset,UnrealEditorImport,docs/day1-day3-datatable-ready-script.md,WI2,Import from bootstrap/import-data/DT_HiddenDialogues.csv
-DT_ReportSentencePools,DataTable,Content/Signal/Data/DataTables/DT_ReportSentencePools.uasset,UnrealEditorImport,docs/day1-day3-datatable-ready-script.md,WI2,Import from bootstrap/import-data/DT_ReportSentencePools.csv
-DT_EndingSubtitles,DataTable,Content/Signal/Data/DataTables/DT_EndingSubtitles.uasset,UnrealEditorImport,docs/day1-day3-datatable-ready-script.md,WI2,Import from bootstrap/import-data/DT_EndingSubtitles.csv
-LV_ApartmentMain,Level,Content/Signal/Levels/Gameplay/LV_ApartmentMain.umap,UnrealEditorCreate,docs/lv-apartment-main-build-steps.md,WI3,Primary slice gameplay level
-BP_SignalGameMode,BlueprintClass,Content/Signal/Blueprints/Framework/BP_SignalGameMode.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 1 of 18
-BP_SignalPlayerController,BlueprintClass,Content/Signal/Blueprints/Player/BP_SignalPlayerController.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 2 of 18
-BP_SignalPlayerCharacter,BlueprintClass,Content/Signal/Blueprints/Player/BP_SignalPlayerCharacter.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 3 of 18
-BP_SignalGameFlowManager,BlueprintClass,Content/Signal/Blueprints/Core/BP_SignalGameFlowManager.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 4 of 18
-BP_RouteStateManager,BlueprintClass,Content/Signal/Blueprints/Core/BP_RouteStateManager.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 5 of 18
-BP_AnomalyManager,BlueprintClass,Content/Signal/Blueprints/Anomalies/BP_AnomalyManager.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 6 of 18
-BP_ComputerTerminal,BlueprintClass,Content/Signal/Blueprints/Interactables/BP_ComputerTerminal.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 7 of 18
-BP_AirConditionerUnit,BlueprintClass,Content/Signal/Blueprints/Interactables/BP_AirConditionerUnit.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 8 of 18
-WBP_DesktopRoot,WidgetBlueprint,Content/Signal/Blueprints/UI/WBP_DesktopRoot.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 9 of 18
-WBP_ChatApp,WidgetBlueprint,Content/Signal/Blueprints/UI/WBP_ChatApp.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 10 of 18
-BP_ChatConversationManager,BlueprintClass,Content/Signal/Blueprints/Dialogue/BP_ChatConversationManager.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 11 of 18
-BP_MinigameManager,BlueprintClass,Content/Signal/Blueprints/Minigames/BP_MinigameManager.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 12 of 18
-WBP_MG_DependencyMatch,WidgetBlueprint,Content/Signal/Blueprints/Minigames/WBP_MG_DependencyMatch.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 13 of 18
-WBP_AnomalyChoicePopup,WidgetBlueprint,Content/Signal/Blueprints/UI/WBP_AnomalyChoicePopup.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 14 of 18
-BP_HiddenDialogueUnlocker,BlueprintClass,Content/Signal/Blueprints/Dialogue/BP_HiddenDialogueUnlocker.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 15 of 18
-WBP_ReportEditor,WidgetBlueprint,Content/Signal/Blueprints/Report/WBP_ReportEditor.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 16 of 18
-WBP_EndingTitleCard,WidgetBlueprint,Content/Signal/Blueprints/Endings/WBP_EndingTitleCard.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 17 of 18
-BPI_Interactable,BlueprintInterface,Content/Signal/Blueprints/Interactables/BPI_Interactable.uasset,UnrealEditorCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Slice core object 18 of 18
+SignalProject.uproject,ProjectFile,SignalProject.uproject,InRepoUpdated,docs/unreal-project-bootstrap-and-blueprint-build-order.md,WI1,Hybrid UE5.7 project descriptor with runtime module
+DefaultEngine.ini,ConfigFile,Config/DefaultEngine.ini,InRepoUpdated,docs/vertical-slice-18-blueprints-implementation-spec.md,WI1,GlobalDefaultGameMode points to native class and maps remain Entry until LV_ApartmentMain exists
+DefaultGame.ini,ConfigFile,Config/DefaultGame.ini,InRepoUpdated,docs/unreal-project-bootstrap-and-blueprint-build-order.md,WI1,Hybrid metadata wording
+DefaultInput.ini,ConfigFile,Config/DefaultInput.ini,InRepoExisting,docs/unreal-project-bootstrap-and-blueprint-build-order.md,WI1,Keep Interact and LeaveDesktop mappings
+SignalProject.Target.cs,TargetFile,Source/SignalProject.Target.cs,InRepoCreate,docs/unreal-project-bootstrap-and-blueprint-build-order.md,WI1,Native game target
+SignalProjectEditor.Target.cs,TargetFile,Source/SignalProjectEditor.Target.cs,InRepoCreate,docs/unreal-project-bootstrap-and-blueprint-build-order.md,WI1,Native editor target
+SignalProject.Build.cs,BuildFile,Source/SignalProject/SignalProject.Build.cs,InRepoCreate,docs/unreal-project-bootstrap-and-blueprint-build-order.md,WI1,Runtime module build rules
+SignalProject.cpp,ModuleSource,Source/SignalProject/Private/SignalProject.cpp,InRepoCreate,docs/unreal-project-bootstrap-and-blueprint-build-order.md,WI1,Module entry point
+SignalSliceTypes.h,NativeSchemaHeader,Source/SignalProject/Public/SignalSliceTypes.h,InRepoCreate,docs/blueprint-variables-events-and-data-fields.md,WI1,Contains E_* enums and FST_* runtime/table structs
+NativeClassAssetMatrix,EditorLandingDoc,bootstrap/editor-landing/native-class-to-derived-asset-matrix.md,InRepoCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Deterministic native->derived asset creation matrix
+LevelManualRefBindingSheet,EditorLandingDoc,bootstrap/editor-landing/level-manual-ref-binding-sheet.md,InRepoCreate,docs/vertical-slice-blueprint-wiring-order.md,WI3,Map instance binding sheet for EditInstanceOnly refs
+FirstEditorSessionRunbook,EditorLandingDoc,bootstrap/editor-landing/first-editor-session-runbook.md,InRepoCreate,docs/unreal-project-bootstrap-and-blueprint-build-order.md,WI3,Low-touch deterministic first Editor session sequence
+ImportSliceDatatablesPy,EditorToolScript,bootstrap/editor-tools/unreal_python/import_slice_datatables.py,InRepoCreate,docs/day1-day3-datatable-ready-script.md,WI3,Optional robust Unreal-Python DataTable import helper
+ValidateSliceEditorSetupPy,EditorToolScript,bootstrap/editor-tools/unreal_python/validate_slice_editor_setup.py,InRepoCreate,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Optional Unreal-Python setup sanity checker
+DT_SystemCopy,DataTable,Content/Signal/Data/DataTables/DT_SystemCopy.uasset,UnrealEditorImport,docs/day1-day3-datatable-ready-script.md,WI3,Import from bootstrap/import-data/DT_SystemCopy.csv using FST_SystemCopyRow
+DT_SupervisorLines,DataTable,Content/Signal/Data/DataTables/DT_SupervisorLines.uasset,UnrealEditorImport,docs/day1-day3-datatable-ready-script.md,WI3,Import from bootstrap/import-data/DT_SupervisorLines.csv using FST_SupervisorLineRow
+DT_NormalReplies,DataTable,Content/Signal/Data/DataTables/DT_NormalReplies.uasset,UnrealEditorImport,docs/day1-day3-datatable-ready-script.md,WI3,Import from bootstrap/import-data/DT_NormalReplies.csv using FST_NormalReplyRow
+DT_HiddenDialogues,DataTable,Content/Signal/Data/DataTables/DT_HiddenDialogues.uasset,UnrealEditorImport,docs/day1-day3-datatable-ready-script.md,WI3,Import from bootstrap/import-data/DT_HiddenDialogues.csv using FST_HiddenDialogueRow
+DT_ReportSentencePools,DataTable,Content/Signal/Data/DataTables/DT_ReportSentencePools.uasset,UnrealEditorImport,docs/day1-day3-datatable-ready-script.md,WI3,Import from bootstrap/import-data/DT_ReportSentencePools.csv using FST_ReportSentenceRow
+DT_EndingSubtitles,DataTable,Content/Signal/Data/DataTables/DT_EndingSubtitles.uasset,UnrealEditorImport,docs/day1-day3-datatable-ready-script.md,WI3,Import from bootstrap/import-data/DT_EndingSubtitles.csv using FST_EndingSubtitleRow
+LV_ApartmentMain,Level,Content/Signal/Levels/Gameplay/LV_ApartmentMain.umap,UnrealEditorCreate,docs/lv-apartment-main-build-steps.md,WI3,Primary gameplay map for slice
+BP_SignalGameFlowManager,BlueprintChild,Content/Signal/Blueprints/Core/BP_SignalGameFlowManager.uasset,UnrealEditorOptionalDerived,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Optional child of native ASignalGameFlowManager for defaults
+BP_RouteStateManager,BlueprintChild,Content/Signal/Blueprints/Core/BP_RouteStateManager.uasset,UnrealEditorOptionalDerived,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Optional child of native ARouteStateManager for defaults
+BP_AnomalyManager,BlueprintChild,Content/Signal/Blueprints/Anomalies/BP_AnomalyManager.uasset,UnrealEditorOptionalDerived,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Optional child of native AAnomalyManager for defaults
+BP_ChatConversationManager,BlueprintChild,Content/Signal/Blueprints/Dialogue/BP_ChatConversationManager.uasset,UnrealEditorOptionalDerived,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Optional child of native AChatConversationManager for defaults
+BP_MinigameManager,BlueprintChild,Content/Signal/Blueprints/Minigames/BP_MinigameManager.uasset,UnrealEditorOptionalDerived,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Optional child of native AMinigameManager for defaults
+BP_HiddenDialogueUnlocker,BlueprintChild,Content/Signal/Blueprints/Dialogue/BP_HiddenDialogueUnlocker.uasset,UnrealEditorOptionalDerived,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Optional child of native AHiddenDialogueUnlocker for defaults
+BP_ComputerTerminal,BlueprintChild,Content/Signal/Blueprints/Interactables/BP_ComputerTerminal.uasset,UnrealEditorOptionalDerived,docs/interaction-spec.md,WI3,Optional child of native AComputerTerminal for mesh/collision defaults
+BP_AirConditionerUnit,BlueprintChild,Content/Signal/Blueprints/Interactables/BP_AirConditionerUnit.uasset,UnrealEditorOptionalDerived,docs/interaction-spec.md,WI3,Optional child of native AAirConditionerUnit for mesh/collision defaults
+BP_SignalPlayerController,BlueprintChild,Content/Signal/Blueprints/Player/BP_SignalPlayerController.uasset,UnrealEditorOptionalDerived,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Recommended to assign DesktopRootWidgetClass and EndingTitleCardWidgetClass
+BP_SignalPlayerCharacter,BlueprintChild,Content/Signal/Blueprints/Player/BP_SignalPlayerCharacter.uasset,UnrealEditorOptionalDerived,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,Optional child of native ASignalPlayerCharacter for tuning defaults
+WBP_DesktopRoot,WidgetBlueprint,Content/Signal/Blueprints/UI/WBP_DesktopRoot.uasset,UnrealEditorCreateDerived,docs/ui-widget-tree-structure.md,WI3,UMG child of UDesktopRootWidget
+WBP_ChatApp,WidgetBlueprint,Content/Signal/Blueprints/UI/WBP_ChatApp.uasset,UnrealEditorCreateDerived,docs/ui-widget-tree-structure.md,WI3,UMG child of UChatAppWidget
+WBP_MG_DependencyMatch,WidgetBlueprint,Content/Signal/Blueprints/Minigames/WBP_MG_DependencyMatch.uasset,UnrealEditorCreateDerived,docs/vertical-slice-18-blueprints-implementation-spec.md,WI3,UMG child of UDependencyMatchWidget
+WBP_AnomalyChoicePopup,WidgetBlueprint,Content/Signal/Blueprints/UI/WBP_AnomalyChoicePopup.uasset,UnrealEditorCreateDerived,docs/ui-widget-tree-structure.md,WI3,UMG child of UAnomalyChoicePopupWidget
+WBP_ReportEditor,WidgetBlueprint,Content/Signal/Blueprints/Report/WBP_ReportEditor.uasset,UnrealEditorCreateDerived,docs/ui-widget-tree-structure.md,WI3,UMG child of UReportEditorWidget
+WBP_EndingTitleCard,WidgetBlueprint,Content/Signal/Blueprints/Endings/WBP_EndingTitleCard.uasset,UnrealEditorCreateDerived,docs/ui-widget-tree-structure.md,WI3,UMG child of UEndingTitleCardWidget

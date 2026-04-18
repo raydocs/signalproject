@@ -1,6 +1,6 @@
-# Editor Bootstrap Checklist (Work Items 2-4)
+# Editor Bootstrap Checklist (Hybrid Flow After Native Work Items 1-2)
 
-Use this checklist after Work Item 1 handoff is complete.
+Use this checklist during the first Unreal Editor session after native compile.
 
 Authority references:
 
@@ -11,85 +11,53 @@ Authority references:
 - Level/layout: `docs/lv-apartment-main-build-steps.md`, `docs/room-layout-and-player-routing.md`
 - UI shell: `docs/ui-widget-tree-structure.md`
 
+Companion landing docs:
+
+- `bootstrap/editor-landing/native-class-to-derived-asset-matrix.md`
+- `bootstrap/editor-landing/level-manual-ref-binding-sheet.md`
+- `bootstrap/editor-landing/first-editor-session-runbook.md`
+
 ---
 
-## A. Project creation and root config
+## A. Native bring-up sanity
 
-- [ ] Create Blueprint-only UE5 project `SignalProject` at repo root.
-- [ ] Confirm generated files exist: `SignalProject.uproject`, `Config/DefaultEngine.ini`, `Config/DefaultGame.ini`, `Config/DefaultInput.ini`.
-- [ ] Add/confirm input actions: `Interact`, `LeaveDesktop`.
+- [ ] Open `SignalProject.uproject` in UE5.7 and let Unreal finish startup.
+- [ ] Confirm module `SignalProject` is loaded.
+- [ ] Confirm native classes are visible (FlowManager, RouteStateManager, AnomalyManager, ChatConversationManager, MinigameManager, HiddenDialogueUnlocker, ComputerTerminal, AirConditionerUnit).
+- [ ] Confirm `GlobalDefaultGameMode=/Script/SignalProject.SignalGameMode` is active.
+- [ ] Keep `DefaultInput` mappings unchanged (`Interact`, `LeaveDesktop`).
 
-## B. Folder scaffold in Content
+## B. DataTable import (frozen order)
 
-- [ ] Create `Content/Signal/Blueprints/` and slice subfolders used in manifest.
-- [ ] Create `Content/Signal/Data/Enums`, `Content/Signal/Data/Structs`, `Content/Signal/Data/DataTables`.
-- [ ] Create `Content/Signal/Levels/Gameplay`.
+- [ ] Create/import DataTables in this exact order using native row structs:
+  1. [ ] `DT_SystemCopy` using `FST_SystemCopyRow`
+  2. [ ] `DT_SupervisorLines` using `FST_SupervisorLineRow`
+  3. [ ] `DT_NormalReplies` using `FST_NormalReplyRow`
+  4. [ ] `DT_HiddenDialogues` using `FST_HiddenDialogueRow`
+  5. [ ] `DT_ReportSentencePools` using `FST_ReportSentenceRow`
+  6. [ ] `DT_EndingSubtitles` using `FST_EndingSubtitleRow`
+- [ ] Source CSVs: `bootstrap/import-data/*.csv`.
+- [ ] Do not rename CSV columns.
 
-## C. Enum / Struct / DataTable creation
+## C. Derived asset creation
 
-- [ ] Create enums (exact names):
-  - [ ] `E_GamePhase`
-  - [ ] `E_AnomalyType`
-  - [ ] `E_ColleagueId`
-  - [ ] `E_SkillUnlockState`
-  - [ ] `E_RouteBranch`
-  - [ ] `E_MinigameType`
-- [ ] Create structs (exact names):
-  - [ ] `ST_ChatMessageRecord`
-  - [ ] `ST_HiddenOptionRecord`
-  - [ ] `ST_SupervisorLineRow`
-  - [ ] `ST_NormalReplyRow`
-  - [ ] `ST_HiddenDialogueRow`
-  - [ ] `ST_SystemCopyRow`
-  - [ ] `ST_ReportSentenceRow`
-  - [ ] `ST_EndingSubtitleRow`
-- [ ] Create/import DataTables in frozen order:
-  1. [ ] `DT_SystemCopy` from `bootstrap/import-data/DT_SystemCopy.csv`
-  2. [ ] `DT_SupervisorLines` from `bootstrap/import-data/DT_SupervisorLines.csv`
-  3. [ ] `DT_NormalReplies` from `bootstrap/import-data/DT_NormalReplies.csv`
-  4. [ ] `DT_HiddenDialogues` from `bootstrap/import-data/DT_HiddenDialogues.csv`
-  5. [ ] `DT_ReportSentencePools` from `bootstrap/import-data/DT_ReportSentencePools.csv`
-  6. [ ] `DT_EndingSubtitles` from `bootstrap/import-data/DT_EndingSubtitles.csv`
+- [ ] Follow `native-class-to-derived-asset-matrix.md` for native class -> asset creation.
+- [ ] Create UMG child blueprints for native widget bases.
+- [ ] Create optional BP children of native actor/controller classes where defaults are needed.
+- [ ] Do not introduce full-version-only systems (`ReportManager`, `AnomalyChoiceDirector`, `HUDManager`).
 
-## D. Slice asset shell creation (18 only)
+## D. Level bring-up and manual refs
 
-- [ ] Create `LV_ApartmentMain` and set `GameMode Override = BP_SignalGameMode`.
-- [ ] Create exactly 18 slice assets:
-  1. [ ] `BP_SignalGameMode`
-  2. [ ] `BP_SignalPlayerController`
-  3. [ ] `BP_SignalPlayerCharacter`
-  4. [ ] `BP_SignalGameFlowManager`
-  5. [ ] `BP_RouteStateManager`
-  6. [ ] `BP_AnomalyManager`
-  7. [ ] `BP_ComputerTerminal`
-  8. [ ] `BP_AirConditionerUnit`
-  9. [ ] `WBP_DesktopRoot`
-  10. [ ] `WBP_ChatApp`
-  11. [ ] `BP_ChatConversationManager`
-  12. [ ] `BP_MinigameManager`
-  13. [ ] `WBP_MG_DependencyMatch`
-  14. [ ] `WBP_AnomalyChoicePopup`
-  15. [ ] `BP_HiddenDialogueUnlocker`
-  16. [ ] `WBP_ReportEditor`
-  17. [ ] `WBP_EndingTitleCard`
-  18. [ ] `BPI_Interactable`
-- [ ] Do not add full-version-only dependencies (`BP_ReportManager`, `BP_AnomalyChoiceDirector`, `BP_SignalHUDManager`).
+- [ ] Create `LV_ApartmentMain`.
+- [ ] Place required runtime actors.
+- [ ] Apply manual ref bindings exactly per `level-manual-ref-binding-sheet.md`.
+- [ ] Keep cross-actor refs manual (`EditInstanceOnly`), map-assigned.
 
-## E. Level placement and mandatory manual refs (Step 0)
+## E. Startup map finalization
 
-- [ ] Place these actors in `LV_ApartmentMain`:
-  - [ ] `BP_SignalGameFlowManager`
-  - [ ] `BP_RouteStateManager`
-  - [ ] `BP_AnomalyManager`
-  - [ ] `BP_ChatConversationManager`
-  - [ ] `BP_MinigameManager`
-  - [ ] `BP_HiddenDialogueUnlocker`
-  - [ ] `BP_ComputerTerminal`
-  - [ ] `BP_AirConditionerUnit`
-- [ ] Manually assign all Step 0 refs in Details panel per `docs/vertical-slice-blueprint-wiring-order.md`.
+- [ ] After level exists, update `Config/DefaultEngine.ini` maps from `/Engine/Maps/Entry` to `/Game/Signal/Levels/Gameplay/LV_ApartmentMain`.
 
-## F. Wiring and first-playable gate
+## F. Validation gate
 
-- [ ] Wire in order: room/desktop -> chat/minigame/FREEZE -> branch handling -> AC resolve -> hidden option -> report -> ending.
-- [ ] Validate with `bootstrap/first-playable-smoke-test.md`.
-- [ ] Treat failures as blockers until all smoke gates pass.
+- [ ] Run `bootstrap/first-playable-smoke-test.md`.
+- [ ] Treat any failed smoke gate as blocker.

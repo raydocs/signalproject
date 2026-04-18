@@ -1,0 +1,17 @@
+# Unreal generated outputs
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Local project/workspace files
+.vs/
+*.xcodeproj
+*.xcworkspace
+
+# Local tooling / exports
+prompt-exports/
+
+# OS noise
+.DS_Store

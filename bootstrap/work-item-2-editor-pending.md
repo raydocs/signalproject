@@ -1,24 +1,31 @@
-# Work Item 2 Pending Items (Require Unreal Editor)
+# Work Item 2 Editor Pending Items
 
-This file records Work Item 2 items that are intentionally **not** created in-repo as text files.
+This file tracks Editor-only work that remains intentionally out-of-repo.
 
-UE version target: **UE5.7**
-Project type target: **Blueprint-only**
+UE target: **UE5.7**
+Project target: **Hybrid native runtime + Editor-authored assets**
 
 ## Pending (must be done in Unreal Editor)
 
-- Create and resave Unreal-generated project metadata as needed when opening `SignalProject.uproject` in UE5.7.
-- Create all enum `.uasset` assets:
-  - `E_GamePhase`, `E_AnomalyType`, `E_ColleagueId`, `E_SkillUnlockState`, `E_RouteBranch`, `E_MinigameType`
-- Create all struct `.uasset` assets:
-  - `ST_ChatMessageRecord`, `ST_HiddenOptionRecord`, `ST_SupervisorLineRow`, `ST_NormalReplyRow`, `ST_HiddenDialogueRow`, `ST_SystemCopyRow`, `ST_ReportSentenceRow`, `ST_EndingSubtitleRow`
-- Create DataTable `.uasset` assets and import CSVs from `bootstrap/import-data/` in frozen order.
-- Create `LV_ApartmentMain.umap` and all Blueprint/Widget assets for later Work Items.
+- Create/import DataTable assets from `bootstrap/import-data/` using native row structs (`FST_*`).
+- Create UMG widget blueprints derived from native widget bases:
+  - `UDesktopRootWidget`
+  - `UChatAppWidget`
+  - `UDependencyMatchWidget`
+  - `UAnomalyChoicePopupWidget`
+  - `UReportEditorWidget`
+  - `UEndingTitleCardWidget`
+- Create optional BP children of native actor/controller classes where designer defaults are needed.
+- Create `LV_ApartmentMain.umap`.
+- Place required actor instances and set manual cross-actor refs (`EditInstanceOnly`) per binding sheet.
+- Assign widget class properties and DataTable references in derived assets/instances.
+- Run `bootstrap/first-playable-smoke-test.md` and resolve blockers.
 
-## Explicitly not created here
+## Explicitly not created in repo
 
 - No fake `.uasset` files
 - No fake `.umap` files
-- No runtime Blueprint wiring in text guesses
+- No duplicated BP enum/struct assets for frozen native schema
+- No speculative auto-generation scripts for widget trees or map placement
 
-Authority remains unchanged in `docs/`.
+Authority remains in `docs/`.

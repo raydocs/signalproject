@@ -2,7 +2,14 @@
   "FileVersion": 3,
   "EngineAssociation": "5.7",
   "Category": "Games",
-  "Description": "SignalProject vertical slice bootstrap scaffold (Blueprint-only).",
+  "Description": "SignalProject vertical slice hybrid bootstrap scaffold (native runtime + Editor-authored assets).",
+  "Modules": [
+    {
+      "Name": "SignalProject",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
   "Plugins": [
     {
       "Name": "EnhancedInput",

@@ -1,6 +1,6 @@
 # Unreal Vertical Slice Bootstrap Handoff Pack
 
-This folder is the **Work Item 1 in-repo bootstrap package** for the Signal Unreal vertical slice.
+This folder is the bootstrap handoff pack for the Signal UE5.7 vertical slice after native Work Items 1-2 are in place and compiling.
 
 It is intentionally derived from authority docs and does **not** replace them.
 
@@ -18,52 +18,66 @@ Primary authority for this slice:
 - `docs/blueprint-variables-events-and-data-fields.md`
 - `docs/day1-day3-datatable-ready-script.md`
 
-## What this bootstrap folder contains
+## Current repo reality (April 18, 2026)
+
+- Native hybrid module exists (`Source/SignalProject/*`).
+- Runtime authority classes + widget bases exist in C++ and compile in UE5.7.
+- Editor-only assets are still pending by design (`.uasset`, `.umap`, widget trees, actor placement).
+
+## What this bootstrap folder now contains
 
 - `asset-manifest.csv`  
-  Required Unreal bootstrap asset inventory (project/config files, enums, structs, datatables, level, 18 slice assets).
-- `import-data/DT_SystemCopy.csv`
-- `import-data/DT_SupervisorLines.csv`
-- `import-data/DT_NormalReplies.csv`
-- `import-data/DT_HiddenDialogues.csv`
-- `import-data/DT_ReportSentencePools.csv`
-- `import-data/DT_EndingSubtitles.csv`  
-  Import CSVs extracted from frozen `docs/day1-day3-datatable-ready-script.md`.
+  Hybrid inventory for native files, DataTable imports, and Editor-later assets.
+- `import-data/*.csv`
+  Frozen CSV sources for six DataTables.
 - `editor-bootstrap-checklist.md`  
-  Ordered Unreal Editor bootstrap checklist for Work Items 2-4.
+  Updated checklist for first Editor bring-up after native compile.
 - `first-playable-smoke-test.md`  
-  First-playable validation sheet for the Day2 FREEZE slice loop and Day3 ending gate.
+  Behavioral validation sheet.
+- `work-item-2-editor-pending.md`  
+  Editor-only pending scope after native in-repo work.
+- `editor-landing/native-class-to-derived-asset-matrix.md`
+  Native class -> derived asset matrix for deterministic Editor creation.
+- `editor-landing/level-manual-ref-binding-sheet.md`
+  Explicit per-actor manual ref binding sheet for `LV_ApartmentMain`.
+- `editor-landing/first-editor-session-runbook.md`
+  Step-by-step first Editor session runbook.
+- `editor-tools/README.md` and `editor-tools/unreal_python/*.py`
+  Optional Unreal-Python helpers for DataTable import and setup sanity checks.
 
 ## Repo-only vs Unreal Editor split
 
-### Repo-only (completed in Work Item 1)
+### Repo-only (already done)
 
-- Build this bootstrap handoff folder
-- Freeze import CSVs from authority doc
-- Provide manifest and execution checklists
+- Native targets, module, and build rules under `Source/`
+- Native runtime authority classes and widget bases
+- Frozen native schema in `Source/SignalProject/Public/SignalSliceTypes.h`
+- Hybrid project/config wiring (`.uproject`, `Config/*`)
 
-### Requires Unreal Editor (Work Items 2-4)
+### Still requires Unreal Editor
 
-- Create `.uproject`, `Config/`, `Content/` assets
-- Create enum/struct/datatable `.uasset` assets and import CSVs
-- Create `LV_ApartmentMain` and 18 slice object shells
-- Place level actors, bind manual refs, wire runtime flow
-- Run first-playable smoke test in-editor
+- DataTable `.uasset` creation/import from `bootstrap/import-data/`
+- UMG widget blueprints derived from native widget bases
+- Optional BP children of native classes for designer defaults
+- `LV_ApartmentMain` creation and actor placement
+- Manual cross-actor ref assignment in level instances
+- Map startup path update after level exists
 
-## Execution order after this handoff
+## First Editor session entry point
 
-1. Use `asset-manifest.csv` to create Unreal project/config/data/slice assets in order.
-2. Import DataTables from `import-data/` in frozen order:
-   1. `DT_SystemCopy`
-   2. `DT_SupervisorLines`
-   3. `DT_NormalReplies`
-   4. `DT_HiddenDialogues`
-   5. `DT_ReportSentencePools`
-   6. `DT_EndingSubtitles`
-3. Follow `editor-bootstrap-checklist.md` for project setup and slice shell creation.
-4. Validate runtime behavior using `first-playable-smoke-test.md`.
+Start with:
+
+1. `bootstrap/editor-landing/first-editor-session-runbook.md`
+2. `bootstrap/editor-landing/native-class-to-derived-asset-matrix.md`
+3. `bootstrap/editor-landing/level-manual-ref-binding-sheet.md`
+
+Optional automation:
+
+- `bootstrap/editor-tools/unreal_python/import_slice_datatables.py`
+- `bootstrap/editor-tools/unreal_python/validate_slice_editor_setup.py`
 
 ## Notes
 
-- This pack does not add or modify slice behavior.
-- This pack does not edit authority docs.
+- No fake `.uasset` or `.umap` files are authored in-repo.
+- Do not duplicate native schema as separate BP enum/struct assets.
+- Keep phase authority intact: only `ASignalGameFlowManager` mutates `CurrentPhase`.
