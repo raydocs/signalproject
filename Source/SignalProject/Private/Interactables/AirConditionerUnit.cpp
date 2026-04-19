@@ -30,6 +30,8 @@ AAirConditionerUnit::AAirConditionerUnit()
     {
         AirConditionerMesh->SetStaticMesh(CubeMesh.Object);
     }
+
+    InteractionText = FText::FromString(TEXT("Repair Air Conditioner"));
 }
 
 bool AAirConditionerUnit::CanInteract_Implementation() const
@@ -46,7 +48,7 @@ bool AAirConditionerUnit::CanInteract_Implementation() const
 
 FText AAirConditionerUnit::GetInteractionText_Implementation() const
 {
-    return FText::FromString(TEXT("Repair Air Conditioner"));
+    return InteractionText.IsEmpty() ? FText::FromString(TEXT("Repair Air Conditioner")) : InteractionText;
 }
 
 void AAirConditionerUnit::Interact_Implementation(AActor* /*InteractingActor*/)
@@ -56,14 +58,16 @@ void AAirConditionerUnit::Interact_Implementation(AActor* /*InteractingActor*/)
         return;
     }
 
+    const FST_HiddenOptionRecord FollowupOption = AnomalyManagerRef ? AnomalyManagerRef->BuildCurrentFollowupOption() : FST_HiddenOptionRecord();
+
     if (AnomalyManagerRef)
     {
         AnomalyManagerRef->ResolveCurrentAnomaly();
     }
 
-    if (HiddenDialogueUnlockerRef)
+    if (HiddenDialogueUnlockerRef && FollowupOption.OptionId != NAME_None)
     {
-        HiddenDialogueUnlockerRef->UnlockColleagueAHiddenOption();
+        HiddenDialogueUnlockerRef->UnlockHiddenOption(FollowupOption);
     }
 
     bIsCurrentlyAvailable = false;

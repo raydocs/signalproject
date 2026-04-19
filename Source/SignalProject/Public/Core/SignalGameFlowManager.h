@@ -48,6 +48,9 @@ public:
     void SubmitSliceReport(FName SelectedSentenceId);
 
     UFUNCTION(BlueprintCallable, Category = "Signal Slice|Flow")
+    void SubmitStructuredReport(const FST_ReportSubmissionPayload& Payload);
+
+    UFUNCTION(BlueprintCallable, Category = "Signal Slice|Flow")
     void TriggerEnding(FName EndingId);
 
     UFUNCTION(BlueprintPure, Category = "Signal Slice|Flow")
@@ -65,6 +68,15 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Signal Slice|Flow")
     FName PendingEndingId = NAME_None;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Signal Slice|Flow")
+    bool bHasSubmittedCurrentDayReport = false;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Signal Slice|Flow")
+    FST_ReportSubmissionPayload LastSubmittedReport;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Signal Slice|Flow")
+    FST_SliceEndingResult LastEndingResult;
 
     UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Signal Slice|Refs")
     TObjectPtr<ARouteStateManager> RouteStateManagerRef;

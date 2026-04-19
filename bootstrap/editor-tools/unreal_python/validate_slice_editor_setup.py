@@ -22,6 +22,7 @@ REQUIRED_CLASSES = [
     "/Script/SignalProject.AirConditionerUnit",
     "/Script/SignalProject.DesktopRootWidget",
     "/Script/SignalProject.ChatAppWidget",
+    "/Script/SignalProject.TaskListWidget",
     "/Script/SignalProject.DependencyMatchWidget",
     "/Script/SignalProject.AnomalyChoicePopupWidget",
     "/Script/SignalProject.ReportEditorWidget",

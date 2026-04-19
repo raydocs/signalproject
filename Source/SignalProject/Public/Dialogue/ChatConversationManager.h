@@ -42,6 +42,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Signal Slice|Chat")
     bool ConsumeHiddenOption(FName OptionId);
 
+    UFUNCTION(BlueprintCallable, Category = "Signal Slice|Chat")
+    TArray<FST_HiddenOptionRecord> GetVisibleOptionsForCurrentConversation() const;
+
 public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Signal Slice|Chat")
     E_ColleagueId CurrentConversationTarget = E_ColleagueId::ColleagueA;

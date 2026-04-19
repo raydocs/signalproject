@@ -8,6 +8,7 @@ class AAnomalyManager;
 class AChatConversationManager;
 class AMinigameManager;
 class ARouteStateManager;
+class SSignalNativeDesktopOverlay;
 class ASignalGameFlowManager;
 class UDesktopRootWidget;
 class UEndingTitleCardWidget;
@@ -53,6 +54,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Signal Slice|Controller")
     bool ShowEndingTitleCard(FName EndingId);
 
+    void HandleNativeOverlayOpenChat();
+    void HandleNativeOverlayOpenReport();
+    void HandleNativeOverlayReturnToRoom();
+
 public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Signal Slice|UI")
     TSubclassOf<UDesktopRootWidget> DesktopRootWidgetClass;
@@ -79,10 +84,28 @@ private:
     UFUNCTION()
     void HandleDebugOpenChatPressed();
 
+    UFUNCTION()
+    void HandleDebugOpenTasksPressed();
+
+    UFUNCTION()
+    void HandleDebugOpenStressTestPressed();
+
+    UFUNCTION()
+    void HandleDebugOpenReportPressed();
+
+    UFUNCTION()
+    void HandleDebugShowRoutineEndingPressed();
+
+    void EnsureNativeDebugDesktopOverlay();
+    void RemoveNativeDebugDesktopOverlay();
+    void RefreshNativeDebugDesktopOverlay();
     void ApplyStartupViewRotation();
     void SetPawnMovementEnabled(bool bEnabled);
 
 private:
+    TSharedPtr<SSignalNativeDesktopOverlay> NativeDebugDesktopOverlay;
+    TSharedPtr<class SWidget> NativeDebugDesktopOverlayHost;
+
     UPROPERTY(Transient)
     TObjectPtr<UDesktopRootWidget> CachedDesktopRoot;
 
@@ -103,4 +126,7 @@ private:
 
     UPROPERTY(Transient)
     TObjectPtr<AMinigameManager> MinigameManagerRef;
+
+    UPROPERTY(Transient)
+    FName NativeDebugActiveAppTag = NAME_None;
 };

@@ -2,31 +2,36 @@
 
 #include "Core/RouteStateManager.h"
 #include "Dialogue/ChatConversationManager.h"
-#include "SignalSliceTypes.h"
 
 AHiddenDialogueUnlocker::AHiddenDialogueUnlocker()
 {
     PrimaryActorTick.bCanEverTick = false;
 }
 
-void AHiddenDialogueUnlocker::UnlockColleagueAHiddenOption()
+void AHiddenDialogueUnlocker::UnlockHiddenOption(const FST_HiddenOptionRecord& HiddenOption)
 {
-    if (!ChatConversationManagerRef)
+    if (!ChatConversationManagerRef || HiddenOption.OptionId == NAME_None)
     {
         return;
     }
 
+    ChatConversationManagerRef->InjectHiddenOption(HiddenOption);
+
+    if (RouteStateManagerRef)
+    {
+        RouteStateManagerRef->SetColleagueUnlockState(HiddenOption.TargetColleague, E_SkillUnlockState::AnomalySeen);
+    }
+}
+
+void AHiddenDialogueUnlocker::UnlockColleagueAHiddenOption()
+{
     FST_HiddenOptionRecord HiddenOption;
     HiddenOption.OptionId = StableOptionId;
     HiddenOption.TargetColleague = E_ColleagueId::ColleagueA;
     HiddenOption.Label = FText::FromString(TEXT("Ask about the glitch"));
     HiddenOption.RequiredAnomaly = E_AnomalyType::FREEZE;
     HiddenOption.UnlockDay = 2;
+    HiddenOption.OptionKind = E_ChatOptionKind::HiddenDialogue;
 
-    ChatConversationManagerRef->InjectHiddenOption(HiddenOption);
-
-    if (RouteStateManagerRef)
-    {
-        RouteStateManagerRef->SetColleagueUnlockState(E_ColleagueId::ColleagueA, E_SkillUnlockState::AnomalySeen);
-    }
+    UnlockHiddenOption(HiddenOption);
 }

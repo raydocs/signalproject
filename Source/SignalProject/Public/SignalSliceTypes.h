@@ -66,6 +66,14 @@ enum class E_MinigameType : uint8
     BugfixFinder
 };
 
+UENUM(BlueprintType)
+enum class E_ChatOptionKind : uint8
+{
+    HiddenDialogue,
+    SelfHandleFollowup,
+    AnomalyReport
+};
+
 USTRUCT(BlueprintType)
 struct SIGNALPROJECT_API FST_ChatMessageRecord
 {
@@ -127,6 +135,93 @@ struct SIGNALPROJECT_API FST_HiddenOptionRecord
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
     int32 UnlockDay = 0;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    E_ChatOptionKind OptionKind = E_ChatOptionKind::HiddenDialogue;
+};
+
+USTRUCT(BlueprintType)
+struct SIGNALPROJECT_API FST_StressTestViewState
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    int32 TotalDraws = 0;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    int32 LastDrawAmount = 0;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    int32 RemainingCurrency = 100;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    int32 StressPoints = 0;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    bool bCanSingleDraw = true;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    bool bCanTenDraw = true;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    bool bIsPaused = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    bool bAwaitingIssueReport = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    E_AnomalyType ActiveAnomalyType = E_AnomalyType::None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FText OutputText;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FText StatusText;
+};
+
+USTRUCT(BlueprintType)
+struct SIGNALPROJECT_API FST_AnomalyRouteConfig
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    E_AnomalyType AnomalyType = E_AnomalyType::None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    E_ColleagueId ReportColleague = E_ColleagueId::ColleagueA;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FName ReportOptionId = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FText ReportOptionLabel;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FText ReportReplyText;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FName FollowupOptionId = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FText FollowupOptionLabel;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FText FollowupReplyText;
+};
+
+USTRUCT(BlueprintType)
+struct SIGNALPROJECT_API FST_DesktopTaskRecord
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FName TaskId = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FText TaskText;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    bool bIsCompleted = false;
 };
 
 USTRUCT(BlueprintType)
@@ -244,6 +339,54 @@ struct SIGNALPROJECT_API FST_ReportSentenceRow : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
     FText Text;
+};
+
+USTRUCT(BlueprintType)
+struct SIGNALPROJECT_API FST_ReportSubmissionPayload
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FName SelectedBaseSentenceId = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FText SelectedBaseSentenceText;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    TArray<FName> SelectedInjectedSentenceIds;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    TArray<FST_ReportSentenceRow> SelectedInjectedRows;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    float TotalStrengthScore = 0.0f;
+};
+
+USTRUCT(BlueprintType)
+struct SIGNALPROJECT_API FST_SliceEndingResult
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FName EndingId = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FText TitleText;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FText SummaryText;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    FText ReportPreviewText;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    int32 SelectedInjectionCount = 0;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    bool bUsedInjectedLines = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Signal Slice")
+    TArray<FST_ReportSentenceRow> SelectedInjectedRows;
 };
 
 USTRUCT(BlueprintType)

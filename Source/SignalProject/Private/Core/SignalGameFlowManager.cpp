@@ -39,17 +39,30 @@ void ASignalGameFlowManager::InitializeGameFlow()
         MinigameManagerRef->BindAnomalyCallbacks();
     }
 
-    if (ChatConversationManagerRef)
-    {
-        ChatConversationManagerRef->InitializeChatSystem(CurrentDayIndex);
-    }
-
     StartDay(CurrentDayIndex);
 }
 
 void ASignalGameFlowManager::StartDay(int32 DayIndex)
 {
     CurrentDayIndex = FMath::Max(1, DayIndex);
+    bHasSubmittedCurrentDayReport = false;
+    LastSubmittedReport = FST_ReportSubmissionPayload();
+    LastEndingResult = FST_SliceEndingResult();
+
+    if (RouteStateManagerRef)
+    {
+        RouteStateManagerRef->ResetForDay();
+    }
+
+    if (AnomalyManagerRef)
+    {
+        AnomalyManagerRef->ResetForDay(CurrentDayIndex);
+    }
+
+    if (MinigameManagerRef)
+    {
+        MinigameManagerRef->ResetForDay(CurrentDayIndex);
+    }
 
     if (ChatConversationManagerRef)
     {
@@ -162,16 +175,63 @@ bool ASignalGameFlowManager::CanOpenReport() const
 
     if (RouteStateManagerRef->LastRouteChoice == E_RouteBranch::HandleMyself)
     {
-        return RouteStateManagerRef->bHasConsumedColleagueAHiddenOption;
+        return RouteStateManagerRef->bHasConsumedSelfHandleFollowupOption;
     }
 
     return RouteStateManagerRef->LastRouteChoice == E_RouteBranch::ReportSupervisor;
 }
 
-void ASignalGameFlowManager::SubmitSliceReport(FName /*SelectedSentenceId*/)
+void ASignalGameFlowManager::SubmitSliceReport(FName SelectedSentenceId)
 {
-    const FName EndingId = RouteStateManagerRef ? RouteStateManagerRef->GetSliceEndingResult() : FName(TEXT("BadEnding"));
-    TriggerEnding(EndingId);
+    FST_ReportSubmissionPayload Payload;
+    Payload.SelectedBaseSentenceId = SelectedSentenceId;
+
+    if (SelectedSentenceId == FName(TEXT("REPORT_FORCE_ROLLOUT")))
+    {
+        Payload.SelectedBaseSentenceText = FText::FromString(TEXT("结论：AI 决策已完美闭环，取消所有人工干预，立即全量上线。"));
+        Payload.TotalStrengthScore = 2.0f;
+    }
+    else
+    {
+        Payload.SelectedBaseSentenceText = FText::FromString(TEXT("项目存在严重问题，需修复。"));
+        Payload.TotalStrengthScore = 0.25f;
+    }
+
+    if (RouteStateManagerRef)
+    {
+        const TArray<FST_ReportSentenceRow> CollectedInjections = RouteStateManagerRef->GetCollectedInjectionSentences();
+        for (const FST_ReportSentenceRow& InjectedRow : CollectedInjections)
+        {
+            Payload.SelectedInjectedSentenceIds.Add(InjectedRow.SentenceId);
+            Payload.SelectedInjectedRows.Add(InjectedRow);
+            Payload.TotalStrengthScore += InjectedRow.StrengthScore;
+        }
+    }
+
+    SubmitStructuredReport(Payload);
+}
+
+void ASignalGameFlowManager::SubmitStructuredReport(const FST_ReportSubmissionPayload& Payload)
+{
+    if (Payload.SelectedBaseSentenceId == NAME_None)
+    {
+        return;
+    }
+
+    bHasSubmittedCurrentDayReport = true;
+    LastSubmittedReport = Payload;
+
+    if (RouteStateManagerRef)
+    {
+        LastEndingResult = RouteStateManagerRef->BuildSliceEndingResult(Payload);
+    }
+    else
+    {
+        LastEndingResult = FST_SliceEndingResult();
+        LastEndingResult.EndingId = FName(TEXT("RoutineEnding"));
+    }
+
+    TriggerEnding(LastEndingResult.EndingId.IsNone() ? FName(TEXT("RoutineEnding")) : LastEndingResult.EndingId);
 }
 
 void ASignalGameFlowManager::TriggerEnding(FName EndingId)

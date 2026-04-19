@@ -20,13 +20,22 @@ public:
     void SetColleagueUnlockState(E_ColleagueId ColleagueId, E_SkillUnlockState NewState);
 
     UFUNCTION(BlueprintCallable, Category = "Signal Slice|Route")
-    void MarkHiddenOptionConsumed(E_ColleagueId ColleagueId, FName OptionId);
+    void MarkHiddenOptionConsumed(E_ColleagueId ColleagueId, FName OptionId, E_ChatOptionKind OptionKind, E_AnomalyType RequiredAnomaly);
+
+    UFUNCTION(BlueprintCallable, Category = "Signal Slice|Route")
+    void ResetForDay();
 
     UFUNCTION(BlueprintPure, Category = "Signal Slice|Route")
     FName GetSliceEndingResult() const;
 
     UFUNCTION(BlueprintPure, Category = "Signal Slice|Route")
     E_SkillUnlockState GetColleagueUnlockState(E_ColleagueId ColleagueId) const;
+
+    UFUNCTION(BlueprintPure, Category = "Signal Slice|Route")
+    TArray<FST_ReportSentenceRow> GetCollectedInjectionSentences() const;
+
+    UFUNCTION(BlueprintPure, Category = "Signal Slice|Route")
+    FST_SliceEndingResult BuildSliceEndingResult(const FST_ReportSubmissionPayload& Payload) const;
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Signal Slice|Route")
@@ -43,6 +52,16 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Signal Slice|Route")
     bool bHasConsumedColleagueAHiddenOption = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Signal Slice|Route")
+    bool bHasConsumedSelfHandleFollowupOption = false;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Signal Slice|Route")
+    TArray<FST_ReportSentenceRow> CollectedInjectionSentences;
+
+private:
+    FST_ReportSentenceRow BuildInjectionSentence(E_ColleagueId ColleagueId, E_AnomalyType RequiredAnomaly) const;
+    const FST_ReportSentenceRow* FindCollectedInjectionSentence(FName SentenceId) const;
 
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Signal Slice|Route", meta = (AllowPrivateAccess = "true"))

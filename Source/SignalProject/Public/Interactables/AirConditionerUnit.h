@@ -32,6 +32,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Signal Slice|Anomaly")
     E_AnomalyType HandledAnomalyType = E_AnomalyType::FREEZE;
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Signal Slice|Anomaly")
+    FText InteractionText;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Signal Slice|Interactable")
     TObjectPtr<USceneComponent> SceneRoot;
 

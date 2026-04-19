@@ -56,13 +56,44 @@ ACTOR_SPECS = {
         "fallback": "/Script/SignalProject.ComputerTerminal",
         "location": unreal.Vector(0.0, 300.0, 120.0),
     },
-    "air": {
-        "label": "SP_AirConditionerUnit",
+    "resolver_blackout": {
+        "label": "SP_AirResolver_BLACKOUT",
         "bp": "/Game/Signal/Blueprints/Interactables/BP_AirConditionerUnit",
         "fallback": "/Script/SignalProject.AirConditionerUnit",
         "location": unreal.Vector(240.0, 300.0, 120.0),
     },
+    "resolver_diskclean": {
+        "label": "SP_AirResolver_DISKCLEAN",
+        "bp": "/Game/Signal/Blueprints/Interactables/BP_AirConditionerUnit",
+        "fallback": "/Script/SignalProject.AirConditionerUnit",
+        "location": unreal.Vector(420.0, 300.0, 120.0),
+    },
+    "resolver_freeze": {
+        "label": "SP_AirResolver_FREEZE",
+        "bp": "/Game/Signal/Blueprints/Interactables/BP_AirConditionerUnit",
+        "fallback": "/Script/SignalProject.AirConditionerUnit",
+        "location": unreal.Vector(600.0, 300.0, 120.0),
+    },
 }
+
+RESOLVER_CONFIGS = {
+    "resolver_blackout": {
+        "anomaly_type": unreal.E_AnomalyType.BLACKOUT,
+        "interaction_text": "Toggle light-switch bypass (BLACKOUT placeholder)",
+    },
+    "resolver_diskclean": {
+        "anomaly_type": unreal.E_AnomalyType.DISKCLEAN,
+        "interaction_text": "Inspect computer-case heavy-load vents (DISKCLEAN placeholder)",
+    },
+    "resolver_freeze": {
+        "anomaly_type": unreal.E_AnomalyType.FREEZE,
+        "interaction_text": "Adjust AC cooling controls (FREEZE placeholder)",
+    },
+}
+
+LEGACY_ACTOR_LABELS = [
+    "SP_AirConditionerUnit",
+]
 
 PLAYER_START_SPEC = {
     "label": "SP_PlayerStart",
@@ -94,6 +125,10 @@ CLASS_DEFAULT_CHECKS = [
         "/Game/Signal/Blueprints/Minigames/BP_MinigameManager",
         "AnomalyChoicePopupClass",
     ),
+    (
+        "/Game/Signal/Blueprints/UI/WBP_DesktopRoot",
+        "TaskListWidgetClass",
+    ),
 ]
 
 
@@ -107,8 +142,12 @@ def _ensure_map_loaded() -> None:
         raise RuntimeError(f"Failed to load map: {LEVEL_PATH}")
 
 
+def _actor_subsystem() -> unreal.EditorActorSubsystem:
+    return unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+
+
 def _all_actors() -> list[unreal.Actor]:
-    return list(unreal.EditorLevelLibrary.get_all_level_actors())
+    return list(_actor_subsystem().get_all_level_actors())
 
 
 def _find_actor_by_label(label: str):
@@ -138,13 +177,21 @@ def _spawn_or_reuse(spec: dict, summary: dict):
         return existing
 
     spawn_class = _load_spawn_class(spec["bp"], spec["fallback"])
-    actor = unreal.EditorLevelLibrary.spawn_actor_from_class(spawn_class, spec["location"], unreal.Rotator(0.0, 0.0, 0.0))
+    actor = _actor_subsystem().spawn_actor_from_class(spawn_class, spec["location"], unreal.Rotator(0.0, 0.0, 0.0))
     if not actor:
         raise RuntimeError(f"Failed to spawn actor for label {spec['label']}")
 
     actor.set_actor_label(spec["label"])
     summary["created"].append(spec["label"])
     return actor
+
+
+def _remove_legacy_actors(summary: dict):
+    for legacy_label in LEGACY_ACTOR_LABELS:
+        legacy_actor = _find_actor_by_label(legacy_label)
+        if legacy_actor:
+            _actor_subsystem().destroy_actor(legacy_actor)
+            summary.setdefault("removed", []).append(legacy_label)
 
 
 def _ensure_player_start(summary: dict):
@@ -162,7 +209,7 @@ def _ensure_player_start(summary: dict):
     if not cls:
         raise RuntimeError("Failed to load /Script/Engine.PlayerStart")
 
-    actor = unreal.EditorLevelLibrary.spawn_actor_from_class(cls, PLAYER_START_SPEC["location"], unreal.Rotator(0.0, 0.0, 0.0))
+    actor = _actor_subsystem().spawn_actor_from_class(cls, PLAYER_START_SPEC["location"], unreal.Rotator(0.0, 0.0, 0.0))
     if not actor:
         raise RuntimeError("Failed to spawn PlayerStart")
 
@@ -187,6 +234,22 @@ def _safe_set(owner, prop: str, value, summary: dict):
     actual = owner.get_editor_property(prop)
     if actual != value:
         raise RuntimeError(f"{owner.get_actor_label()}.{prop} verification mismatch")
+
+    summary["bindings"].append(f"{owner.get_actor_label()}.{prop}")
+
+
+def _safe_set_text(owner, prop: str, value: str, summary: dict):
+    try:
+        owner.set_editor_property(prop, value)
+    except Exception as exc:
+        raise RuntimeError(f"{owner.get_actor_label()}.{prop} text set failed: {exc}")
+
+    actual = owner.get_editor_property(prop)
+    actual_str = actual.to_string() if hasattr(actual, "to_string") else str(actual)
+    if actual_str != value:
+        raise RuntimeError(
+            f"{owner.get_actor_label()}.{prop} text verification mismatch: {actual_str} != {value}"
+        )
 
     summary["bindings"].append(f"{owner.get_actor_label()}.{prop}")
 
@@ -241,6 +304,7 @@ def run() -> None:
     summary = {
         "created": [],
         "reused": [],
+        "removed": [],
         "bindings": [],
     }
 
@@ -248,6 +312,8 @@ def run() -> None:
     actors = {}
 
     try:
+        _remove_legacy_actors(summary)
+
         for key, spec in ACTOR_SPECS.items():
             actors[key] = _spawn_or_reuse(spec, summary)
 
@@ -291,10 +357,15 @@ def run() -> None:
         _safe_set(actors["computer"], "GameFlowManagerRef", actors["flow"], summary)
         _safe_set(actors["computer"], "SystemCopyTable", dt_system, summary)
 
-        _safe_set(actors["air"], "AnomalyManagerRef", actors["anomaly"], summary)
-        _safe_set(actors["air"], "HiddenDialogueUnlockerRef", actors["hidden"], summary)
-        _safe_set(actors["air"], "GameFlowManagerRef", actors["flow"], summary)
-        _safe_set(actors["air"], "SystemCopyTable", dt_system, summary)
+        for resolver_key, resolver_config in RESOLVER_CONFIGS.items():
+            resolver_actor = actors[resolver_key]
+            _safe_set(resolver_actor, "AnomalyManagerRef", actors["anomaly"], summary)
+            _safe_set(resolver_actor, "HiddenDialogueUnlockerRef", actors["hidden"], summary)
+            _safe_set(resolver_actor, "GameFlowManagerRef", actors["flow"], summary)
+            _safe_set(resolver_actor, "SystemCopyTable", dt_system, summary)
+            _safe_set(resolver_actor, "bIsCurrentlyAvailable", True, summary)
+            _safe_set(resolver_actor, "HandledAnomalyType", resolver_config["anomaly_type"], summary)
+            _safe_set_text(resolver_actor, "InteractionText", resolver_config["interaction_text"], summary)
 
         _apply_world_settings(summary)
         _verify_class_defaults()
@@ -308,6 +379,7 @@ def run() -> None:
 
     unreal.log(f"Created actors: {summary['created']}")
     unreal.log(f"Reused actors: {summary['reused']}")
+    unreal.log(f"Removed legacy actors: {summary['removed']}")
     unreal.log(f"Applied bindings ({len(summary['bindings'])}): {summary['bindings']}")
 
     if errors:

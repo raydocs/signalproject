@@ -18,8 +18,25 @@ ACTOR_LABELS = {
     "minigame": "SP_MinigameManager",
     "hidden": "SP_HiddenDialogueUnlocker",
     "computer": "SP_ComputerTerminal",
-    "air": "SP_AirConditionerUnit",
+    "resolver_blackout": "SP_AirResolver_BLACKOUT",
+    "resolver_diskclean": "SP_AirResolver_DISKCLEAN",
+    "resolver_freeze": "SP_AirResolver_FREEZE",
     "player_start": "SP_PlayerStart",
+}
+
+RESOLVER_EXPECTATIONS = {
+    "resolver_blackout": {
+        "anomaly_type": unreal.E_AnomalyType.BLACKOUT,
+        "interaction_text": "Toggle light-switch bypass (BLACKOUT placeholder)",
+    },
+    "resolver_diskclean": {
+        "anomaly_type": unreal.E_AnomalyType.DISKCLEAN,
+        "interaction_text": "Inspect computer-case heavy-load vents (DISKCLEAN placeholder)",
+    },
+    "resolver_freeze": {
+        "anomaly_type": unreal.E_AnomalyType.FREEZE,
+        "interaction_text": "Adjust AC cooling controls (FREEZE placeholder)",
+    },
 }
 
 EXPECTED_TABLES = {
@@ -60,6 +77,11 @@ CLASS_DEFAULT_CHECKS = [
         "AnomalyChoicePopupClass",
         "/Game/Signal/Blueprints/UI/WBP_AnomalyChoicePopup.WBP_AnomalyChoicePopup_C",
     ),
+    (
+        "/Game/Signal/Blueprints/UI/WBP_DesktopRoot",
+        "TaskListWidgetClass",
+        "/Game/Signal/Blueprints/UI/WBP_TaskList.WBP_TaskList_C",
+    ),
 ]
 
 EXPECTED_WORLD_SETTINGS = {
@@ -98,6 +120,23 @@ def _expect_int(owner, prop: str, expected_value: int) -> None:
     if int(actual) != int(expected_value):
         raise RuntimeError(
             f"Value mismatch: {owner.get_actor_label()}.{prop}={actual} (expected {expected_value})"
+        )
+
+
+def _expect_value(owner, prop: str, expected_value) -> None:
+    actual = owner.get_editor_property(prop)
+    if actual != expected_value:
+        raise RuntimeError(
+            f"Value mismatch: {owner.get_actor_label()}.{prop}={actual} (expected {expected_value})"
+        )
+
+
+def _expect_text(owner, prop: str, expected_value: str) -> None:
+    actual = owner.get_editor_property(prop)
+    actual_text = actual.to_string() if hasattr(actual, "to_string") else str(actual)
+    if actual_text != expected_value:
+        raise RuntimeError(
+            f"Text mismatch: {owner.get_actor_label()}.{prop}={actual_text} (expected {expected_value})"
         )
 
 
@@ -187,10 +226,15 @@ def run() -> None:
     _expect_ref(actors["computer"], "GameFlowManagerRef", actors["flow"])
     _expect_asset_path(actors["computer"], "SystemCopyTable", EXPECTED_TABLES["system"])
 
-    _expect_ref(actors["air"], "AnomalyManagerRef", actors["anomaly"])
-    _expect_ref(actors["air"], "HiddenDialogueUnlockerRef", actors["hidden"])
-    _expect_ref(actors["air"], "GameFlowManagerRef", actors["flow"])
-    _expect_asset_path(actors["air"], "SystemCopyTable", EXPECTED_TABLES["system"])
+    for resolver_key, expectation in RESOLVER_EXPECTATIONS.items():
+        resolver_actor = actors[resolver_key]
+        _expect_ref(resolver_actor, "AnomalyManagerRef", actors["anomaly"])
+        _expect_ref(resolver_actor, "HiddenDialogueUnlockerRef", actors["hidden"])
+        _expect_ref(resolver_actor, "GameFlowManagerRef", actors["flow"])
+        _expect_asset_path(resolver_actor, "SystemCopyTable", EXPECTED_TABLES["system"])
+        _expect_value(resolver_actor, "bIsCurrentlyAvailable", True)
+        _expect_value(resolver_actor, "HandledAnomalyType", expectation["anomaly_type"])
+        _expect_text(resolver_actor, "InteractionText", expectation["interaction_text"])
 
     _verify_world_settings(world)
     _verify_class_defaults()

@@ -65,6 +65,12 @@ BINDINGS = [
         "class",
         "/Game/Signal/Blueprints/Report/WBP_ReportEditor",
     ),
+    (
+        "/Game/Signal/Blueprints/UI/WBP_DesktopRoot",
+        "TaskListWidgetClass",
+        "class",
+        "/Game/Signal/Blueprints/UI/WBP_TaskList",
+    ),
     # Deterministic widget DataTable defaults
     (
         "/Game/Signal/Blueprints/Report/WBP_ReportEditor",

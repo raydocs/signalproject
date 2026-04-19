@@ -28,6 +28,7 @@ BP_SPECS = [
 WIDGET_SPECS = [
     ("/Script/SignalProject.DesktopRootWidget", "WBP_DesktopRoot", "/Game/Signal/Blueprints/UI"),
     ("/Script/SignalProject.ChatAppWidget", "WBP_ChatApp", "/Game/Signal/Blueprints/UI"),
+    ("/Script/SignalProject.TaskListWidget", "WBP_TaskList", "/Game/Signal/Blueprints/UI"),
     ("/Script/SignalProject.DependencyMatchWidget", "WBP_MG_DependencyMatch", "/Game/Signal/Blueprints/Minigames"),
     ("/Script/SignalProject.AnomalyChoicePopupWidget", "WBP_AnomalyChoicePopup", "/Game/Signal/Blueprints/UI"),
     ("/Script/SignalProject.ReportEditorWidget", "WBP_ReportEditor", "/Game/Signal/Blueprints/Report"),
